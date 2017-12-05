@@ -1,4 +1,4 @@
- var socket = io();
+ var socket = io('http://192.168.0.93:8080');
 var socketid;
  socket.on('connection', function (data, myHtml) {
   $('#main').html(myHtml)
@@ -62,14 +62,14 @@ socket.on('usersListData', function(d){
 
 			}
 			var sock = d[k].socketId
-			sock = sock.split('').splice(-5).join('')
+			// sock = sock.split('').splice(-5).join('')
 			$('#'+userList).append('<li id="'+sock+'" class="list-group-item'+status+'">'+d[k].username+'</li>')
 		console.log(k +" : "+ d[k])
 		console.log('username '+d[k].username)
 		console.log('username '+d[k].loggedIn)
 		console.log('username '+d[k].socketId)
 		var sock = d[k].socketId
-		sock = sock.split('').splice(-5).join('')
+		// sock = sock.split('').splice(-5).join('')
 		console.log(sock)
 		// for (var j in d[k]){
 		// 	console.log(j+" : "+d[k][j])

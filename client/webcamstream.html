@@ -35,7 +35,7 @@
 	<script type="text/javascript" src="jsmpeg.js"></script>
 	<script type="text/javascript">
 		// Setup the WebSocket connection and start the player
-		var client = new WebSocket( 'ws://192.168.200.90:8080' );
+		var client = new WebSocket( 'ws://192.168.0.93:9999/badass' );
 		var canvas = document.getElementById('videoCanvas');
 		var player = new jsmpeg(client, {canvas:canvas});
 	</script>
