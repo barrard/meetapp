@@ -1,4 +1,4 @@
- var socket = io('http://192.168.0.93:8080');
+ var socket = io('https://draggon.us/meetapp');
 var socketid;
  socket.on('connection', function (data, myHtml) {
   $('#main').html(myHtml)
