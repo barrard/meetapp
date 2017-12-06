@@ -5,6 +5,7 @@ var express = require('express');
 var socketio = require('socket.io')
 var Jimp = require("jimp");
 var compression = require('compression')
+var cors = require('cors')
 
 
 var https = require('https');
@@ -61,6 +62,7 @@ var startGame;
 
 
 
+app.use(cors())
 
 app.use(compression())
 
