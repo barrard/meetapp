@@ -181,7 +181,7 @@ app.get('/video', function(req, res){
      readStream.pipe(res);
 })
 
-var STREAM_PORT = 9999
+var STREAM_PORT = 9998
 // HTTP Server to accept incomming MPEG Stream
 var streamServer = require('http').createServer( function(request, response) {
   var params = request.url.substr(1).split('/');
