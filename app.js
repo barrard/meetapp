@@ -20,13 +20,6 @@ var WebSocket = require('ws').Server
 var fs = require("fs");
 
 if (DEVELOPMENT===true) {
-//DEVELOPMENT USE
-//dont use this, but saving for some reason
-//  var sslOptions = {
-//   key: fs.readFileSync('/home/sailor/nodeServers/digitalOcean/key.pem'),
-//   cert: fs.readFileSync('/home/sailor/nodeServers/digitalOcean/key-cert.pem')
-// };
-//dev server
 var server = http.createServer(app);
 var io = socketio(server);
 var wss = new WebSocket({ server: server })
@@ -73,11 +66,7 @@ app.enable('trust proxy');
 app.set('username', 'null')
 app.set('userLoggedIn', false)
 app.set('clientDir', __dirname+'/client/')
-// MongoClient.connect(url, function(err, db){
-// 	if(!err){
-// 		console.log("We are connected to "+db+", poolSize = ");
-// 	}
-// })
+
 
 if (PRODUCTION===true) {
  app.all('/*', function(req, res, next) {   
@@ -97,15 +86,6 @@ if (PRODUCTION===true) {
 app.use(express.static('client'));
 app.use(favicon(__dirname + '/client/images/favicon.ico'));
 
-// app.get('/', function(req, res){
-//       var readStream = fs.createReadStream(app.get('clientDir')+'mygrid/myGridDocs.html');
-//      //res.set({"Content-Disposition":"attachment; filename=//mygrid/myGridDocs.html"});
-//      readStream.pipe(res);
-// })
-
-//app.get('*', function(req, res, next){
-//	console.log(req.path)
-//})
 app.get('/', function(req, res){
   console.log('connection IP address '+req.ip);
   var readStream = fs.createReadStream(app.get('clientDir')+'index/index.html');
@@ -144,12 +124,6 @@ app.post('/goleft', function(req, res){
 
 
 
-app.get('/mygrid', function(req, res){
-    var readStream = fs.createReadStream(app.get('clientDir')+'mygrid/myGridDocs.html');
-     //res.set({"Content-Disposition":"attachment; filename=//mygrid/myGridDocs.html"});
-     readStream.pipe(res);
-
-})
 
 app.get('users/:username/', function(req, res){
   var username = req.params.username;
@@ -161,7 +135,6 @@ app.get('users/:username/', function(req, res){
             readStream.pipe(res);            
           }
     
-     //res.set({"Content-Disposition":"attachment; filename=//mygrid/myGridDocs.html"});
 
 })
 
@@ -308,15 +281,6 @@ app.post('/updateLocations', function(req, res){
   res.end('you did it!!')
 })
 
-//badass video stream
-// var videoStreamSocket = io.of('/badass').on('connection', function(socket){
-//   console.log('/badass connection?  '+ socket.id)
-//   socket.emit('videoStreamSocket', socket.id)
-// })
-
-// io.of('/video').on('connection', function(socket){
-
-// })
 
 
   var width = 320,
@@ -374,104 +338,188 @@ io.on('connection', function (socket) {
 
 
 
-	
-  //teamBallPlease
-  socket.on('teamBallPlease', function(socketId){
-    console.log(socket+ ' Requesting Teamball Index')
-    fs.readFile(__dirname + "/client/teamBallJS/views/loginRegister.html", 'utf8', function(err, data){
-      if (err) {
-        console.log(err+' err getting teamball loginRegister.html')
-      }else {
-        console.log('Sending the teamball login back to '+socketId)
-        socket.emit('loginRegister', data)
+
+    var mkdirp = require('mkdirp');
+    socket.on('scrape', function(url){
+      var twilli_path = '/home/sailor/templates/login_pages/register_login/'
+      var certFile = '/home/sailor/meetapp/meetupBackup/ssl/ca-crt.pem'
+      var keyFile = '/home/sailor/meetapp/meetupBackup/ssl/ca-key.pem'
+      var index_file_name = 'index.html'
+      var options = {
+        url: url,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.133 Mobile Safari/535.19'
+        },
+         agentOptions: {
+             cert: fs.readFileSync(certFile),
+             key: fs.readFileSync(keyFile),
+             // Or use `pfx` property replacing `cert` and `key` when using private key, certificate and CA certs in PFX or PKCS12 format:
+             // pfx: fs.readFileSync(pfxFilePath),
+             passphrase: 'password',
+             securityOptions: 'SSL_OP_NO_SSLv3'
+         }
+      };
+      var root_url = url.split('/').slice(0,-1).join('/')+'/'
+          console.log(url)
+          request(options, function(error, response, body) {
+              if (!error && response.statusCode === 200) {
+                  if (body) {
+                       //res.send(body)
+                      var chee = cheerio.load(body)
+                      //console.log(chee)
+                      console.log('---------------------------------')
+                      var links = chee('link')
+                      var imgs = chee('img')
+                      var other_imgs = chee('data-img-src')
+                      var all_tags = chee('*')
+                      var scripts = chee('script')
+                      function get_resources(tags, attr){
+                        for(var x = 0 ; x < tags.length ; x++){
+                          let href = chee(tags[x]).attr(attr)
+                          //determin if its an image for the binary method
+                          var ext;
+                          if(href){
+                            if (href.startsWith('http')){continue}
+                            ext = href.split('.').slice(-1).join().toLowerCase()
+                            console.log(href)
+
+                            console.log(ext)
+                            console.log(ext)
+                            console.log(ext)
+                            console.log(ext)
+                            console.log(ext)
+                            console.log(ext)
+                            console.log(href)
+
+                            if(ext === 'png' || ext === 'jpg' || ext === 'gif'){
+                              options.encoding='binary'
+                              options.url = root_url+href
+                              request(options, function(error, response, body) {
+                                if (!error && response.statusCode === 200) {
+                                  console.log('no error and response is 200')
+                                  if (body) { 
+                                    console.log('body we got')
+                                    write_file(body, href, 'binary')
+
+                                  }
+                                }else{
+                                 console.log('WTF BINARY??')
+                                 console.log(options.url)
+                                 console.log(error)
+                                 // console.log(response)
+                                }
+                              });
+                            }else{
+                              options.encoding=undefined
+                              options.url = root_url+href
+                              request(options, function(error, response, body) {
+                                if (!error && response.statusCode === 200) {
+                                  console.log('no error and response is 200')
+                                  if (body) { 
+                                    console.log('body we got')
+                                    write_file(body, href)
+
+                                  }
+                                }else{
+                                  console.log('WTF text??')
+                                  console.log(options.url)
+                                  console.log(error)
+                                  // console.log(response)
+                                  // console.log(body)
+                                }
+                              })
+                            }
+
+                          }
+
+
+
+
+
+                        }
+
+                      }
+
+                      function write_file(body, href, binary){
+                        if(binary){
+                          console.log('BINARY IMAGE I ASSUME')
+                          fs.writeFile(twilli_path+href, body, 'binary', function(err) {
+                            huh(err, body, href)
+                          })
+                        }else{
+                          fs.writeFile(twilli_path+href, body, function(err) {
+                            console.log('CSS?? or JS?')
+
+                            huh(err, body, href)
+
+
+                          })
+                        }
+
+                      }
+
+
+                      get_resources(imgs, 'src')
+                      get_resources(links, 'href')
+                      get_resources(all_tags, 'data-custom-background-img')
+                      get_resources(scripts, 'src')
+
+                      function huh(err, body, href){
+                        if(err){
+                          console.log(err)
+                          if(err.errno === -2){
+                            console.log('we need to create this DIRRR')
+                            let dir_path = href.split('/')
+                            console.log(dir_path)
+                            // dir_path.shift()
+                            console.log(dir_path)
+                            dir_path = dir_path.slice(0,-1)
+                            console.log(dir_path)
+                            dir_path=dir_path.join('/')
+                            console.log(dir_path)
+                            mkdirp(twilli_path+dir_path, (err)=>{
+                              if(err){console.log('+++    we cannot make the DIRRRRR   ++++')}
+                                else{
+                                  console.log('dir made, lets re write the filessssss')
+                                  write_file(body, href)
+                                }
+                            })
+                          }
+                        }
+                        else{
+                          console.log('files saved @ '+twilli_path+href)
+                        }
+                      }
+
+
+                      write_file(body, index_file_name)
+
+
+
+
+                  } else {
+                      console.log('no body')
+                      socket.emit('serverResponse', 'no body')
+                  }
+              }else if(error){
+                socket.emit('serverResponse', 'error '+error)
+                console.log('error '+error)
+                  for (var k in error){
+                console.log(k+' : '+error[k])
       }
-    })
-  })  //teamBallPlease
-
-
-
-  socket.on('TBlogin', function(dataObject){
-    console.log('I got a data object ' +dataObject)
-    for (var k in dataObject){
-      console.log(k +' : '+dataObject[k])
-    }
-    var teamName = dataObject.username;
-    var password = dataObject.password;
-
-    if (teamName === '' || password === '') {
-        socket.emit('loginError', "Please user your keyboard and type in your login info")
-
-    }else{
-      socket.emit('loginError', "Verifying....")
-
-    }
-
-
-  })//TBlogin
-
-  socket.on('TBRegister', function(dataObject){
-    console.log('I got a data object ' +dataObject)
-    for (var k in dataObject){
-      console.log(k +' : '+dataObject[k])
-    }
-    var teamName = dataObject.username;
-    var password = dataObject.password;
-
-    if (teamName === '' || password === '') {
-        socket.emit('registerError', "Please user your keyboard and type in your login info")
-
-    }else{
-      socket.emit('registerError', "Verifying....")
-
-    }
-
-
-  })//TBRegister
-
-
-	socket.on('scrape', function(url){
-
-		    request(url, function(error, response, body) {
-		        if (!error && response.statusCode === 200) {
-		            if (body) {
-		                 //res.send(body)
-		                var chee = cheerio.load(body)
-		                //console.log(chee)
-		                console.log("Going to write into existing file");
-		                fs.writeFile(__dirname+'/client/scrape/iframe.html', body, function(err) {
-		                    if (err) {
-		                    	socket.emit('serverResponse', err)
-		                        return console.error(err);
-		                    }else{
-		                    console.log("Data written successfully! ");
-		                    socket.emit('serverResponse', 'success')
-		                 	const buf4 = new Buffer('tést', 'utf8');
-		                    console.log("Let's read newly written data")
-                      };
-		                });
-		            } else {
-		                console.log('no body')
-		                socket.emit('serverResponse', 'no body')
-		            }
-		        }else if(error){
-		        	socket.emit('serverResponse', 'error '+error)
-		        	console.log('error '+error)
-		           	for (var k in error){
-		       		console.log(k+' : '+error[k])
-		}
-		        }else if (response){
-		        	socket.emit('serverResponse', 'response '+response)
-		        	console.log('response '+response)
-		        	for (var k in response){
-		        		console.log(k+' : '+response[k])
-		}
-		        }
-		    })
+              }else if (response){
+                socket.emit('serverResponse', 'response '+response)
+                console.log('response '+response)
+                for (var k in response){
+                  console.log(k+' : '+response[k])
+      }
+              }
+          })
 
 
 
 
-	})//scrape
+    })//scrape
 
 socket.on('new', function(d, loggedInUserSocketid) {
 	console.log('----------new-------------emited')
@@ -905,15 +953,6 @@ socket.on('chatInput', function(d){
 
 
 
-socket.on('stocksHTMLrequest', function(d){
-  console.log(d.time)
-      fs.readFile(__dirname + "/client/views/stocks/commodities.html", 'utf8', function(err, data) {
-        if(err){console.log(err)}
-          else{
-            socket.emit('stocksHTMLdata', data)
-          }
-      })
-})
 
 
 

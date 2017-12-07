@@ -29,8 +29,6 @@
 </div>
 
 
-
-
 <script>
 	
 var myVar = setInterval(function(){ myTimer() }, 100);
@@ -46,17 +44,9 @@ function myTimer() {
 
 
 
-	<script src="jquery.js"></script>
-	<script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-
-
-
-
-
-
-
-
+<script>
 	window.document.addEventListener('mousemove', function(e){
 
 		var x = e.clientX;
@@ -64,15 +54,12 @@ function myTimer() {
 
 	var width = $(window).width();
 	var div = $('div');
-	// var top = $('div').css('top');
 	var topp = div.offset().top;
 	var left = div.offset().left;
-	// var right = $('span').css('left');
 	var rt = ($(window).width() - (left + div.width()));
 	var shadow = div.css('textShadow').split(" ");
 	var right = width - rt;
-	// var shadowX= shadow[3];
-	// var shadowY= shadow[4];
+
 	var middle = (parseInt(right) - parseInt(left))/2 + parseInt(left);
 	var constant = middle / 100;
 
@@ -84,20 +71,13 @@ function myTimer() {
 	var deY = ((parseInt(topp)+ (div.height()/2) )-y)/constant;
 	
 	var blurr = ((parseInt(topp)+(div.height()/2))-y)/20;
-	// console.log('x is '+x);
-	// console.log('y is '+y);
-	// console.log('middle is '+middle);
-	// console.log('topp is '+topp);
-	// console.log('topp is '+topp-(div.height()/2));
+
 
 	if(blurr < 0){
 		blurr = blurr*-1
 	}
 	var blur = blurr+'px';
 
-	// if( (y <= (div.height()+top)) || (y >= (div.height()+top)) ){
-	// 	$('div').css('textShadow', '#000000 '+(0)+' '+(0)+' '+blur);
-	// }
 	if( ((-15 <= deY) && (10 >= deY)) && ((-12 <= deX) && (13 >= deX))  ) {
 		deY = 0;
 		deX = 0;
@@ -105,26 +85,16 @@ function myTimer() {
 
 var dX = deX+'px';
 var dY = deY+'px';
-	$('div').css('textShadow', '#000000 '+(dX)+' '+(dY)+' '+blur);
+var list_items = $('li')
+
+		$('div').css('textShadow', '#000000 '+(dX)+' '+(dY)+' '+blur);
+
+
 
 
 
 
 	});
-
-
-		// console.log('The Shadow is '+shadow);
-		// console.log('The constant is '+constant);
-		// console.log('The D is '+dX);
-		// console.log('The Dex is '+deX);
-		// console.log('The middle is '+middle);
-		// console.log('The width is '+width);
-		// console.log('The X-shdow value is '+shadowX);
-		// console.log('The Y-shdow value is '+shadowY);
-		// console.log(top+' from the top, and '+left+' from the left, And '+right+'px from the right');
-		// console.log('X-mouse loc is: '+x+' Y-mouse loc is: '+y);
-
-	// });
 	</script>
 </body>
 </html>
