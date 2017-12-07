@@ -103,6 +103,9 @@ app.use(favicon(__dirname + '/client/images/favicon.ico'));
 //      readStream.pipe(res);
 // })
 
+//app.get('*', function(req, res, next){
+//	console.log(req.path)
+//})
 app.get('/', function(req, res){
   console.log('connection IP address '+req.ip);
   var readStream = fs.createReadStream(app.get('clientDir')+'index/index.html');
