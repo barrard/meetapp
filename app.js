@@ -21,8 +21,8 @@ var fs = require("fs");
 
 if (DEVELOPMENT===true) {
 var server = http.createServer(app);
-var io = socketio(server, {path:'/socket.io'});
-// var io = socketio(server, {path:'/meetapp'});
+// var io = socketio(server, {path:'/socket.io'});
+var io = socketio(server);
 var wss = new WebSocket({ server: server })
 }
 
