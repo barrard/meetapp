@@ -1,7 +1,7 @@
 var HOST = 66.8.168.178
 var PROTOCOL = location.protocol
  // var socket = io(PROTOCOL+'//'+HOST);
- var socket = io(PROTOCOL+'//'+HOST, {path:'/meetapp/socket.io'});
+ var socket = io(PROTOCOL+'//66.8.168.178/', {path:'/meetapp/socket.io'});
  // var socket = io('https://draggon.us/meetapp');
 var socketid;
  socket.on('connection', function (data, myHtml) {
