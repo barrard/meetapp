@@ -659,7 +659,7 @@ socket.on('dashboardReady', function(d){
         var allusers = db.collection('allusers');
 
         allMessages.find().count(function(err, count){
-          if(!err && count<20){
+          if(!err && count>20){
               allMessages.find().skip(count-20).toArray(function(err, item){
                 if(err){console.log('error finding messages '+err)}
                 else{
