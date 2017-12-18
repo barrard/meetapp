@@ -105,6 +105,10 @@ socket.on('userLogin', function(sock, sockId, username){
 })
 
 
+socket.on('disconnect', function(){
+	console.log('discon')
+})
+
 
 socket.on('userDisconnected', function(d){
 	var sock = d

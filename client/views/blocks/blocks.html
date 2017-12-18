@@ -83,6 +83,7 @@ function makeBox(color){
 	$(box).addClass('box')
 	var boxArea = $('.boxArea')
 	box.style.backgroundColor=color
+	$(box).attr('id', 1)
 	$(box).on('click', moveBox)
 	$(boxArea).append(box)
 

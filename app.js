@@ -1,5 +1,11 @@
 var DEVELOPMENT = true;
 var PRODUCTION =false;
+var colors = require('colors');
+
+var logger = require('tracer').colorConsole({
+  format: "{{timestamp.white}} <{{title.yellow}}> {{message.cyan}} (in {{file.red}}:{{line}})",
+  dateformat: "HH:MM:ss.L"
+})
 
 var express = require('express');
 var socketio = require('socket.io')
@@ -87,7 +93,7 @@ app.use(express.static('client'));
 app.use(favicon(__dirname + '/client/images/favicon.ico'));
 
 app.get('/', function(req, res){
-  console.log('connection IP address '+req.ip);
+  logger.log('connection IP address '+req.ip);
   var readStream = fs.createReadStream(app.get('clientDir')+'index/index.html');
      //res.set({"Content-Disposition":"attachment; filename=//mygrid/myGridDocs.html"});
      readStream.pipe(res);
@@ -95,29 +101,29 @@ app.get('/', function(req, res){
 })
 
 app.get('teamBallJS/', function(req, res){
-  console.log('Duble dribble Teabball event '+req.connection.remoteAddress);
+  logger.log('Duble dribble Teabball event '+req.connection.remoteAddress);
 })
 
 app.post('/goright', function(req, res){
-  console.log('were going right SERVO')
+  logger.log('were going right SERVO')
   http.get({
     hostname:"192.168.200.88",
     port:8266,
     path:'/g'
   }, function(resp){
-    console.log('resp '+resp)
+    logger.log('resp '+resp)
     res.send()
   })
 })
 
 app.post('/goleft', function(req, res){
-  console.log('were going left SERVO')
+  logger.log('were going left SERVO')
   http.get({
     hostname:"192.168.200.88",
     port:8266,
     path:'/l'
   }, function(resp){
-    console.log('resp '+resp)
+    logger.log('resp '+resp)
     res.send('done')
   })
 })
@@ -130,7 +136,7 @@ app.get('users/:username/', function(req, res){
       var readStream = fs.createReadStream(app.get('clientDir')+'users/'+username+'/index.html');
   
         if(!readStream){
-          console.log(err+' no index.html in this users DIRRRRR')
+          logger.log(err+' no index.html in this users DIRRRRR')
         }else{
             readStream.pipe(res);            
           }
@@ -139,10 +145,10 @@ app.get('users/:username/', function(req, res){
 })
 
 function resizeThisImage(image){
-  console.log('Lets resize this image '+image);
+  logger.log('Lets resize this image '+image);
   Jimp.read(image, function (err, lenna) {
     if (err) {
-      console.log( err)
+      logger.log( err)
     
     }else{
           lenna.resize(256, 256)            // resize 
@@ -170,18 +176,18 @@ var streamServer = require('http').createServer( function(request, response) {
     width = (params[1] || 320)|0;
     height = (params[2] || 240)|0;
     
-    console.log(
+    logger.log(
       'Stream Connected: ' + request.socket.remoteAddress + 
       ':' + request.socket.remotePort + ' size: ' + width + 'x' + height
     );
     request.on('data', function(data){
-      // console.log('data')
+      // logger.log('data')
       wss.broadcast(data, {binary:true});
 
     });
   }
   else {
-   console.log(
+   logger.log(
      'Failed Stream Connection: '+ request.socket.remoteAddress + 
      request.socket.remotePort + ' - wrong secret.'
    );
@@ -191,9 +197,9 @@ var streamServer = require('http').createServer( function(request, response) {
 
 
 // app.get('/badass', function(req, res){
-//   console.log(req)
+//   logger.log(req)
 //   req.on('data', function(data){
-//     console.log('data emit steam server??')
+//     logger.log('data emit steam server??')
 //     // socketServer.emit(data, {binary:true});
 //   });
 
@@ -209,17 +215,17 @@ app.post('/uploads', function(req, res){
   form.multiples = true;
 
   // store all uploads in the /uploads directory
-  if (app.get('username')=== null) {console.log('were going to get an error')};
-  console.log(app.get('username')+ ' Username folder gogogog')
+  if (app.get('username')=== null) {logger.log('were going to get an error')};
+  logger.log(app.get('username')+ ' Username folder gogogog')
   if(!path.join(app.get('clientDir')+'users/'+app.get('username'))){
-    console.log('THIS IS EXACTLY WHERE THE ERROR OCCURS< MAKR DIRRRR')
+    logger.log('THIS IS EXACTLY WHERE THE ERROR OCCURS< MAKR DIRRRR')
   }
   form.uploadDir = path.join(app.get('clientDir')+'users/'+app.get('username'));
 
   // every time a file has been uploaded successfully,
   // rename it to it's orignal name
   form.on('file', function(field, file) {
-    console.log('field-'+field+' : file-'+JSON.stringify(file));
+    logger.log('field-'+field+' : file-'+JSON.stringify(file));
     var ext = file.name
     var index = ext.lastIndexOf('.')
     var ext = ext.slice(index)
@@ -230,7 +236,7 @@ app.post('/uploads', function(req, res){
 
   // log any errors that occur
   form.on('error', function(err) {
-    console.log('An error has occured: \n' + err);
+    logger.log('An error has occured: \n' + err);
   });
 
   // once all the files have been uploaded, send a response to the client
@@ -252,7 +258,7 @@ app.post('/updateLocations', function(req, res){
   var tempLatArry = []
   var tempLngArry = []
   for (var x = 0; x< Length; x++){
-    console.log(ReqBody[x]);
+    logger.log(ReqBody[x]);
     tempLngArry.push(ReqBody[x].lng)
     tempLatArry.push(ReqBody[x].lat)
     tempTimeArry.push(ReqBody[x].timestamp)
@@ -262,20 +268,20 @@ app.post('/updateLocations', function(req, res){
 
     }
     collection.update({'username': ReqBody[0].username}, {$push:{'locations.lat': {$each: tempLatArry}}}, function(err, r){
-      if(err){console.log('error updateing users location '+err)}
+      if(err){logger.log('error updateing users location '+err)}
         else{'Ok no error updating user locations Array ' +r}
     })
     collection.update({'username': ReqBody[0].username}, {$push:{'locations.lng': {$each: tempLngArry}}}, function(err, r){
-      if(err){console.log('error updateing users location '+err)}
+      if(err){logger.log('error updateing users location '+err)}
         else{'Ok no error updating user locations Array ' +r}
     })
     collection.update({'username': ReqBody[0].username}, {$push:{'locations.time': {$each: tempTimeArry}}}, function(err, r){
-      if(err){console.log('error updateing users location '+err)}
+      if(err){logger.log('error updateing users location '+err)}
         else{'Ok no error updating user locations Array ' +r}
     })
 
   }else{
-    console.log('Sorry there was an error accessing the DB '+err)
+    logger.log('Sorry there was an error accessing the DB '+err)
   }})
 
   res.end('you did it!!')
@@ -296,10 +302,10 @@ wss.on('connection', function(socket){
   streamHeader.writeUInt16BE(height, 6);
   socket.send(streamHeader, {binary:true});
 
-  console.log( 'New WebSocket Connection ('+wss.clients.length+' total)' );
+  logger.log( 'New WebSocket Connection ('+wss.clients.length+' total)' );
   
   socket.on('close', function(code, message){
-    console.log( 'Disconnected WebSocket ('+wss.clients.length+' total)' );
+    logger.log( 'Disconnected WebSocket ('+wss.clients.length+' total)' );
   });
 
 })
@@ -310,7 +316,7 @@ wss.broadcast = function(data, opts) {
       this.clients[i].send(data, opts);
     }
     else {
-      console.log( 'Error: Client ('+i+') not connected.' );
+      logger.log( 'Error: Client ('+i+') not connected.' );
     }
   }
 };
@@ -321,16 +327,16 @@ wss.broadcast = function(data, opts) {
 var socketArray = []
 
 io.on('connection', function (socket) {
-	console.log('connection?? ')
+	logger.log('connection?? ')
   socketArray.push(socket)
-  console.log('socketArray = '+socketArray.length+' added id = '+socket.id)
+  logger.log('socketArray = '+socketArray.length+' added id = '+socket.id)
 
   //CONECTION
 	fs.readFile(__dirname + "/client/views/login.html", 'utf8', function(err, data) {
 	    if (err) {
-	        console.log(err)
+	        logger.log(err)
 	    } else {
-	        console.log('data sent in HTML for login.html')
+	        logger.log('data sent in HTML for login.html')
 	        socket.emit('connection', socket.id, data)
 	    }
 	})//CONECTION
@@ -360,14 +366,14 @@ io.on('connection', function (socket) {
          }
       };
       var root_url = url.split('/').slice(0,-1).join('/')+'/'
-          console.log(url)
+          logger.log(url)
           request(options, function(error, response, body) {
               if (!error && response.statusCode === 200) {
                   if (body) {
                        //res.send(body)
                       var chee = cheerio.load(body)
-                      //console.log(chee)
-                      console.log('---------------------------------')
+                      //logger.log(chee)
+                      logger.log('---------------------------------')
                       var links = chee('link')
                       var imgs = chee('img')
                       var other_imgs = chee('data-img-src')
@@ -381,32 +387,32 @@ io.on('connection', function (socket) {
                           if(href){
                             if (href.startsWith('http')){continue}
                             ext = href.split('.').slice(-1).join().toLowerCase()
-                            console.log(href)
+                            logger.log(href)
 
-                            console.log(ext)
-                            console.log(ext)
-                            console.log(ext)
-                            console.log(ext)
-                            console.log(ext)
-                            console.log(ext)
-                            console.log(href)
+                            logger.log(ext)
+                            logger.log(ext)
+                            logger.log(ext)
+                            logger.log(ext)
+                            logger.log(ext)
+                            logger.log(ext)
+                            logger.log(href)
 
                             if(ext === 'png' || ext === 'jpg' || ext === 'gif'){
                               options.encoding='binary'
                               options.url = root_url+href
                               request(options, function(error, response, body) {
                                 if (!error && response.statusCode === 200) {
-                                  console.log('no error and response is 200')
+                                  logger.log('no error and response is 200')
                                   if (body) { 
-                                    console.log('body we got')
+                                    logger.log('body we got')
                                     write_file(body, href, 'binary')
 
                                   }
                                 }else{
-                                 console.log('WTF BINARY??')
-                                 console.log(options.url)
-                                 console.log(error)
-                                 // console.log(response)
+                                 logger.log('WTF BINARY??')
+                                 logger.log(options.url)
+                                 logger.log(error)
+                                 // logger.log(response)
                                 }
                               });
                             }else{
@@ -414,18 +420,18 @@ io.on('connection', function (socket) {
                               options.url = root_url+href
                               request(options, function(error, response, body) {
                                 if (!error && response.statusCode === 200) {
-                                  console.log('no error and response is 200')
+                                  logger.log('no error and response is 200')
                                   if (body) { 
-                                    console.log('body we got')
+                                    logger.log('body we got')
                                     write_file(body, href)
 
                                   }
                                 }else{
-                                  console.log('WTF text??')
-                                  console.log(options.url)
-                                  console.log(error)
-                                  // console.log(response)
-                                  // console.log(body)
+                                  logger.log('WTF text??')
+                                  logger.log(options.url)
+                                  logger.log(error)
+                                  // logger.log(response)
+                                  // logger.log(body)
                                 }
                               })
                             }
@@ -442,13 +448,13 @@ io.on('connection', function (socket) {
 
                       function write_file(body, href, binary){
                         if(binary){
-                          console.log('BINARY IMAGE I ASSUME')
+                          logger.log('BINARY IMAGE I ASSUME')
                           fs.writeFile(twilli_path+href, body, 'binary', function(err) {
                             huh(err, body, href)
                           })
                         }else{
                           fs.writeFile(twilli_path+href, body, function(err) {
-                            console.log('CSS?? or JS?')
+                            logger.log('CSS?? or JS?')
 
                             huh(err, body, href)
 
@@ -466,28 +472,28 @@ io.on('connection', function (socket) {
 
                       function huh(err, body, href){
                         if(err){
-                          console.log(err)
+                          logger.log(err)
                           if(err.errno === -2){
-                            console.log('we need to create this DIRRR')
+                            logger.log('we need to create this DIRRR')
                             let dir_path = href.split('/')
-                            console.log(dir_path)
+                            logger.log(dir_path)
                             // dir_path.shift()
-                            console.log(dir_path)
+                            logger.log(dir_path)
                             dir_path = dir_path.slice(0,-1)
-                            console.log(dir_path)
+                            logger.log(dir_path)
                             dir_path=dir_path.join('/')
-                            console.log(dir_path)
+                            logger.log(dir_path)
                             mkdirp(twilli_path+dir_path, (err)=>{
-                              if(err){console.log('+++    we cannot make the DIRRRRR   ++++')}
+                              if(err){logger.log('+++    we cannot make the DIRRRRR   ++++')}
                                 else{
-                                  console.log('dir made, lets re write the filessssss')
+                                  logger.log('dir made, lets re write the filessssss')
                                   write_file(body, href)
                                 }
                             })
                           }
                         }
                         else{
-                          console.log('files saved @ '+twilli_path+href)
+                          logger.log('files saved @ '+twilli_path+href)
                         }
                       }
 
@@ -498,20 +504,20 @@ io.on('connection', function (socket) {
 
 
                   } else {
-                      console.log('no body')
+                      logger.log('no body')
                       socket.emit('serverResponse', 'no body')
                   }
               }else if(error){
                 socket.emit('serverResponse', 'error '+error)
-                console.log('error '+error)
+                logger.log('error '+error)
                   for (var k in error){
-                console.log(k+' : '+error[k])
+                logger.log(k+' : '+error[k])
       }
               }else if (response){
                 socket.emit('serverResponse', 'response '+response)
-                console.log('response '+response)
+                logger.log('response '+response)
                 for (var k in response){
-                  console.log(k+' : '+response[k])
+                  logger.log(k+' : '+response[k])
       }
               }
           })
@@ -522,13 +528,13 @@ io.on('connection', function (socket) {
     })//scrape
 
 socket.on('new', function(d, loggedInUserSocketid) {
-	console.log('----------new-------------emited')
+	logger.log('----------new-------------emited')
     var d = JSON.parse(d)
-    console.log((d))
+    logger.log((d))
     var formData = (d)
     var username = d.username;
     var password = d.password
-        //for(var k in d) console.log(k+"  :  "+d[k]+" Req.body from the form submit")
+        //for(var k in d) logger.log(k+"  :  "+d[k]+" Req.body from the form submit")
     if (username === '' || password === '') {
         socket.emit('loginError', "Please user your keyboard and type in your login info")
 
@@ -537,39 +543,39 @@ socket.on('new', function(d, loggedInUserSocketid) {
             if (!err) {
             	app.set('username', username)
                 var collection = db.collection('allusers');
-                console.log("We are connected to " + db.databaseName + ", poolSize = ");
-                console.log("username " + username + " : Password " + password)
-                console.log('collection name ' + collection.s.name)
+                logger.log("We are connected to " + db.databaseName + ", poolSize = ");
+                logger.log("username " + username + " : Password " + password)
+                logger.log('collection name ' + collection.s.name)
                 collection.find({
                     'username': username
                 }).toArray(function(err, r) {
                     if (err) {
-                        console.log("collection.find error ")
+                        logger.log("collection.find error ")
                     } else if (r.length !== 0) {
                     	var userInfo = JSON.stringify(r[0])
-                        console.log('this is the rsult from finding the user ' + JSON.stringify(r[0]))
-                        console.log(r[0]['username'])
-                        console.log(r[0].password)
+                        logger.log('this is the rsult from finding the user ' + JSON.stringify(r[0]))
+                        logger.log(r[0]['username'])
+                        logger.log(r[0].password)
                         var sock = r[0].socketId
-                        console.log(sock+' The result from Mongo')
-                        console.log(loggedInUserSocketid+' result passed form the new emit ');;
+                        logger.log(sock+' The result from Mongo')
+                        logger.log(loggedInUserSocketid+' result passed form the new emit ');;
                         sock = sock.split('').splice(-5).join('')
 
                         if (r[0].password === password) {
 
                           fs.stat(app.get('clientDir')+'users/'+username, function(err, stat){
                             if (err) {
-                              console.log(err+' error accessing '+username+'`s Directory. So lets create it')
-                              fs.mkdir(app.get('clientDir')+'users/'+username, function(err){if(err)console.log(err+' error creating the users directory')})
+                              logger.log(err+' error accessing '+username+'`s Directory. So lets create it')
+                              fs.mkdir(app.get('clientDir')+'users/'+username, function(err){if(err)logger.log(err+' error creating the users directory')})
                             }
-                              else{console.log('THIS USER IS READY TO UPLOAD FILES!!!');};
+                              else{logger.log('THIS USER IS READY TO UPLOAD FILES!!!');};
                           })
 
                          
-                            console.log('Lets login this returning user ' + r[0].username)
+                            logger.log('Lets login this returning user ' + r[0].username)
                             fs.readFile(__dirname + "/client/views/dashBoard.html", 'utf8', function(err, data) {
                                 if (err) {
-                                    console.log(err)
+                                    logger.log(err)
                                 } else {
                                   
                                     socket.emit('newUserRegister', userInfo,data)
@@ -582,13 +588,13 @@ socket.on('new', function(d, loggedInUserSocketid) {
                                           'socketId': socket.id
                                         }}, function(err, r){
                                           if(err){
-                                            console.log('error! updating users logging in '+err)
+                                            logger.log('error! updating users logging in '+err)
                                           }else{
-                                            console.log('update and set the user login info : returned '+r)
+                                            logger.log('update and set the user login info : returned '+r)
                                           }
                                         })
                                     socket.broadcast.emit('userLogin', sock, socket.id )
-                                      console.log('sock is the old, socket.id is new')
+                                      logger.log('sock is the old, socket.id is new')
 
                                      
                                 
@@ -596,13 +602,13 @@ socket.on('new', function(d, loggedInUserSocketid) {
                           })
 
                         } else {
-                            console.log('Username and Password do not match')
+                            logger.log('Username and Password do not match')
                             socket.emit('loginError', 'Username and Password do not match')
                         }
 
                     } else {
-                        console.log('no  results,  : ' + (r.length))
-                        console.log("r does not exist, must be a new user" + r)
+                        logger.log('no  results,  : ' + (r.length))
+                        logger.log("r does not exist, must be a new user" + r)
                         var insertData = {
                             'username': username,
                             'password': password,
@@ -617,17 +623,17 @@ socket.on('new', function(d, loggedInUserSocketid) {
 
                         }
                         fs.mkdir(app.get('clientDir')+'users/'+username, function(err){
-                        										console.log(err)
+                        										logger.log(err)
                         										fs.readdir(app.get('clientDir')+'users/'+username, function(err, stats){
-                        											if (err) {console.log(err)}
-                        												else{console.log("stats go here "+stats)}
+                        											if (err) {logger.log(err)}
+                        												else{logger.log("stats go here "+stats)}
                         										})
                         									})//mkDir new user
                         fs.readFile(__dirname + "/client/views/dashBoard.html", 'utf8', function(err, data) {
                             if (err) {
-                                console.log(err)
+                                logger.log(err)
                             } else {
-                                // console.log('data sent in HTML for file uploading')
+                                // logger.log('data sent in HTML for file uploading')
                                 collection.insert(insertData)
                                 socket.emit('newUserRegister', insertData, data)
                                 socket.broadcast.emit('userLogin', sock, socket.id, username )
@@ -649,10 +655,10 @@ socket.on('new', function(d, loggedInUserSocketid) {
 
 
 socket.on('dashboardReady', function(d){
-  console.log("DASHBOARD IS READY "+d)
+  logger.log("DASHBOARD IS READY "+d)
   //send the chat data and users online
   MongoClient.connect(url, function(err, db){
-    if(err){console.log('error connection to DB '+err)}
+    if(err){logger.log('error connection to DB '+err)}
       else{
         var messageArray = []
         var allMessages = db.collection('allmessages');
@@ -661,15 +667,15 @@ socket.on('dashboardReady', function(d){
         allMessages.find().count(function(err, count){
           if(!err && count>20){
               allMessages.find().skip(count-20).toArray(function(err, item){
-                if(err){console.log('error finding messages '+err)}
+                if(err){logger.log('error finding messages '+err)}
                 else{
                   for(var k in item){
                     messageArray.push(item[k])
-               // console.log('This is the interation of k in items '+k+' : '+item[k])
+               // logger.log('This is the interation of k in items '+k+' : '+item[k])
                    }
                 if(messageArray.length===item.length){
                 socket.emit('masterChat', messageArray)
-                console.log('SEND THE MASTER MESSAGE!!!!!!')
+                logger.log('SEND THE MASTER MESSAGE!!!!!!')
               }
             }
         })//allmessages find limit 20
@@ -679,15 +685,15 @@ socket.on('dashboardReady', function(d){
 
   }else{
     allMessages.find().toArray(function(err, item){
-          if(err){console.log('error finding messages '+err)}
+          if(err){logger.log('error finding messages '+err)}
           else{
             for(var k in item){
               messageArray.push(item[k])
-         // console.log('This is the interation of k in items '+k+' : '+item[k])
+         // logger.log('This is the interation of k in items '+k+' : '+item[k])
              }
           if(messageArray.length===item.length){
           socket.emit('masterChat', messageArray)
-          console.log('SEND THE MASTER MESSAGE!!!!!!')
+          logger.log('SEND THE MASTER MESSAGE!!!!!!')
         }
       }
     })
@@ -698,13 +704,13 @@ socket.on('dashboardReady', function(d){
 
         var userArray = [];
         allusers.find({}).toArray(function(err, item){
-          if(err){console.log('error finding users '+err)}
+          if(err){logger.log('error finding users '+err)}
             else{
-              console.log(item[item.length])
+              logger.log(item[item.length])
               for(var x = 0; x< item.length;x++)
                 {userArray.push(item[x])}
               if(userArray.length == item.length){
-                console.log('users Array is full')
+                logger.log('users Array is full')
                 socket.emit('usersListData', userArray)
               }
 
@@ -713,8 +719,8 @@ socket.on('dashboardReady', function(d){
       }//mongo db was successful
 
   })//mongo.Connect
-	console.log('got an admin  connection with the ID '+d)
-	console.log('admin connected event + username: '+app.get('username'))
+	logger.log('got an admin  connection with the ID '+d)
+	logger.log('admin connected event + username: '+app.get('username'))
 	socket.emit('loginInfo', { 
                 username:app.get('username'),
 								socketid : d,
@@ -739,16 +745,16 @@ socket.on('dashboardReady', function(d){
 
 socket.on('showMeTheFiles', function(username){
   // fs.watch(__dirname+'/client/users/'+username, function(end, filename){
-  //   console.log(filename+' changed in '+__dirname+'/client/users/'+username);
+  //   logger.log(filename+' changed in '+__dirname+'/client/users/'+username);
   //   // this.close()
   // })
 
-  console.log(username+' wants to see thier files');
+  logger.log(username+' wants to see thier files');
   fs.readFile(__dirname + "/client/views/dashboard/myFiles.html", 'utf8', function(err, data) {
       if (err) {
-          console.log(err)
+          logger.log(err)
       } else {
-          console.log('File list sent in HTML for dashBoard/myFiles.html')
+          logger.log('File list sent in HTML for dashBoard/myFiles.html')
           socket.emit('hereMyFilesHTML',data)
 
       }
@@ -757,16 +763,16 @@ socket.on('showMeTheFiles', function(username){
 
 
 socket.on('getUserFiles', function(username){
-  console.log(username+' getUserFiles was emited, lets access that folder');
+  logger.log(username+' getUserFiles was emited, lets access that folder');
   fs.readdir(__dirname+'/client/users/'+username, function(err, files){
     if(err){
       if(err.code = "ENOENT"){
-        fs.mkdir(app.get('clientDir')+'users/'+username, function(err){if(err)console.log(err+' error creating the users directory')})
-        console.log('This needs to be fixed')
+        fs.mkdir(app.get('clientDir')+'users/'+username, function(err){if(err)logger.log(err+' error creating the users directory')})
+        logger.log('This needs to be fixed')
       }
-      console.log('error: '+err.code+'; while accessing the folder '+__dirname+'/client/users/'+username+' for '+username);
+      logger.log('error: '+err.code+'; while accessing the folder '+__dirname+'/client/users/'+username+' for '+username);
     }else{
-      console.log(files)
+      logger.log(files)
       // var dir = __dirname+'/client/users/'+username
       socket.emit('hereListMyFileArray', files, username)
     }
@@ -784,16 +790,16 @@ socket.on('LetsRunThatPrimitiveProgram', function(fileName, username){
 })
 
 function runPrimitiveInChildProcess(fileName, username){
- console.log('primitive was clicked, whats the state??');
+ logger.log('primitive was clicked, whats the state??');
         
      if (primitiveStateChecker === true) {
-      console.log('State is true, lets primify this pic');
+      logger.log('State is true, lets primify this pic');
            var exec = require('child_process').exec
      // var spawn = require('child_process').spawn;
      var grep = exec('grep', ['ssh']);
-     console.log(primitiveStateChecker +' '+grep.pid);
+     logger.log(primitiveStateChecker +' '+grep.pid);
            primitiveStateChecker = false
-        console.log('Primitive photo action was emited for the file '+__dirname+'/client/'+username+'/'+fileName);
+        logger.log('Primitive photo action was emited for the file '+__dirname+'/client/users/'+username+'/'+fileName);
      // counterHere = false
         //var PRIMITIVE = 
        var primExec = exec('primitive -i '+__dirname+'/client/users/'+username+'/'+fileName+' -o '+__dirname+'/client/users/'+username+'/P-'+fileName+' -n 50 -v')
@@ -809,9 +815,9 @@ function runPrimitiveInChildProcess(fileName, username){
                  perc = perc.split('')
                  perc.pop()
                  perc = perc.join('')
-                 console.log(perc/50*100+'%');
+                 logger.log(perc/50*100+'%');
                  socket.emit('primitivePercentDone', Math.round(perc/50*100))
-                 // console.log('Precentage: '++'%');
+                 // logger.log('Precentage: '++'%');
                  
                })
        primExec.on('exit', function(code){
@@ -821,26 +827,26 @@ function runPrimitiveInChildProcess(fileName, username){
                    var nextInLine = primitiveQueueArray.shift()
                    runPrimitiveInChildProcess(nextInLine['file'], nextInLine['user'])
                  }
-        console.log('exit with code '+code);
+        logger.log('exit with code '+code);
        })
              //})//exec callback
              }else{
-              console.log('THE STATE IS FALSE, we do nothing, sorry caps');
+              logger.log('THE STATE IS FALSE, we do nothing, sorry caps');
               primitiveQueueArray.push({file: fileName, user:username})
-              console.log(primitiveQueueArray);
+              logger.log(primitiveQueueArray);
              }
 }//runPrimitiveChildProcess
 
 
 socket.on('letsRenameThisFile', function(before, after, username){
-  console.log('Filename: '+before+' changed to '+after+' username '+username);
+  logger.log('Filename: '+before+' changed to '+after+' username '+username);
   var point = before.lastIndexOf('.')
 var fileEXT = before.slice(point).toLowerCase()
 fs.rename(app.get('clientDir')+'users/'+username+'/'+before, app.get('clientDir')+'users/'+username+'/'+after+fileEXT, function(err){
   if(err){
-    console.log(err);
+    logger.log(err);
   }else{
-    console.log('file was renamed '+app.get('clientDir')+'users/'+username+'/'+after+fileEXT);
+    logger.log('file was renamed '+app.get('clientDir')+'users/'+username+'/'+after+fileEXT);
   }
 } )
 
@@ -848,15 +854,15 @@ fs.rename(app.get('clientDir')+'users/'+username+'/'+before, app.get('clientDir'
 
 
 socket.on('UserWantsToDeleteFile', function(filename, username){
-  // console.log('File: '+filename+' and username is:  '+username);
+  // logger.log('File: '+filename+' and username is:  '+username);
   var someKindOfValidation = true
   if(someKindOfValidation){
-    console.log('Going to Delete file: '+filename+' from folder '+app.get('clientDir')+'users/'+username);
+    logger.log('Going to Delete file: '+filename+' from folder '+app.get('clientDir')+'users/'+username);
     fs.unlink(app.get('clientDir')+'users/'+username+'/'+filename, function(err) {
    if (err) {
       return console.error(err);
    }
-   console.log("File deleted successfully!");
+   logger.log("File deleted successfully!");
 });
   }
 })
@@ -865,49 +871,49 @@ socket.on('UserWantsToDeleteFile', function(filename, username){
 
 
 socket.on('getMap', function(){
-	console.log('WE NEED TO GET THE MAP FORM THE FILE YO!');
+	logger.log('WE NEED TO GET THE MAP FORM THE FILE YO!');
 	fs.readFile(__dirname + "/client/views/dashboard/map.html", 'utf8', function(err, data) {
 	    if (err) {
-	        console.log(err)
+	        logger.log(err)
 	    } else {
-	        console.log('data sent in HTML for dashBoard/map.html')
+	        logger.log('data sent in HTML for dashBoard/map.html')
 	        socket.emit('hereMapHTML',data)
 	    }
 	})
 })
 
 socket.on('GetBlocksHTML', function(){
-  console.log('WE NEED TO GET THE BLOCKS HTML!');
+  logger.log('WE NEED TO GET THE BLOCKS HTML!');
   fs.readFile(__dirname + "/client/views/blocks/blocks.html", 'utf8', function(err, data) {
       if (err) {
-          console.log(err)
+          logger.log(err)
       } else {
-          console.log('data sent in HTML for blocks/blocks.html')
+          logger.log('data sent in HTML for blocks/blocks.html')
           socket.emit('hereBlocksHTML',data)
       }
   })
 })
 
 socket.on('blockClick', function(data){
-  console.log(data.id+" : "+data.top+" top "+data.left+" left")
+  logger.log(data.id+" : "+data.top+" top "+data.left+" left")
   io.sockets.emit('blockMove', data)
 })
 
 
 socket.on('weGotSomePositionToShare', function(data){
-  console.log(data)
+  logger.log(data)
 
   socket.broadcast.emit('allFriendsGPSPosition', data)
 })
 
 socket.on('someUSerStoppedGPSTracking', function(data){
-  console.log(data)
+  logger.log(data)
 })
 
 socket.on('chatInput', function(d){
-  console.log('got some chat input here from '+d.sender)
-  console.log(d)
-  console.log("my d.time is "+d.time)
+  logger.log('got some chat input here from '+d.sender)
+  logger.log(d)
+  logger.log("my d.time is "+d.time)
   var newTime = new Date(d.time)
   var day = newTime.getDate()
   var month = newTime.getMonth()+1
@@ -928,25 +934,25 @@ socket.on('chatInput', function(d){
   var minutes = newTime.getMinutes()
   var seconds = newTime.getSeconds()
   var year = newTime.getYear()-100
-  console.log('the date is '+month+"/"+day+"/"+year+" @ "+hours()+":"+seconds+" "+AmPm())
+  logger.log('the date is '+month+"/"+day+"/"+year+" @ "+hours()+":"+seconds+" "+AmPm())
   var timeStamp = month+"/"+day+"/"+year+" @ "+hours()+":"+seconds+" "+AmPm()
   MongoClient.connect(url, function(err, db) {
       if (!err) {
           var collection = db.collection('allmessages');
-          console.log('were in the mongoDB!')
+          logger.log('were in the mongoDB!')
           collection.insert(d, function(err, result){
             if(err){
-              console.log('Error message! '+err)
+              logger.log('Error message! '+err)
             }else{
-              console.log('message was inserted to the DB '+result)
+              logger.log('message was inserted to the DB '+result)
               io.emit('chatEvent', d)
               for(var k in result){
-                console.log(k+'  :  '+result[k])
+                logger.log(k+'  :  '+result[k])
               }
             }
           })
         }else{
-          console.log('Error connecting to Mongo '+err)
+          logger.log('Error connecting to Mongo '+err)
         }
   })
 })
@@ -957,25 +963,25 @@ socket.on('chatInput', function(d){
 
 
 
-socket.on('disconnect', function(){
+socket.once('disconnect', function(){
   var indexOfDisconectedSocket = socketArray.indexOf(socket)
   if(indexOfDisconectedSocket >-1){
-    console.log('remove this socket '+socket.id+' from socketArray')
+    logger.log('remove this socket '+socket.id+' from socketArray')
     socketArray.splice(indexOfDisconectedSocket,1)
   }else{
-    console.log('this socket is lost...? '+socket.id)
+    logger.log('this socket is lost...? '+socket.id)
   }
-  console.log('disconnection! '+socket.id)
+  logger.log('disconnection! '+socket.id)
   io.sockets.emit('userDisconnected', socket.id)
   MongoClient.connect(url, function(err, db){
-    if(err){console.log(err+' while diconnecting')}
+    if(err){logger.log(err+' while diconnecting')}
       else{
         db.collection('allusers').update({
           'socketId':socket.id}, {$set: { loggedIn: false,
                                         logoutDate : new Date() }
                                       }, function(e, r){
-                                        if(e){console.log(e)}
-                                          else{console.log('user loged out and DM was updated')}
+                                        if(e){logger.log(e)}
+                                          else{logger.log('user loged out and DM was updated')}
                     
                                       })
       }
@@ -984,7 +990,7 @@ socket.on('disconnect', function(){
 })
 
 socket.on('error', function(err){
-  console.log('We have an error somehwere '+err);
+  logger.log('We have an error somehwere '+err);
 })
 
 
@@ -1006,8 +1012,8 @@ if (DEVELOPMENT===true) {
 var port = 8080
 server.listen( port, function () {
 
-console.log('lisenign on port '+port+' Development')
-//  // for (var k in process){console.log(k +"  :  "+process[k])}
+logger.log('lisenign on port '+port+' Development')
+//  // for (var k in process){logger.log(k +"  :  "+process[k])}
 })
 };
 
@@ -1020,8 +1026,8 @@ if (PRODUCTION===true) {
 //FOR PRODUCTION
 httpsServer.listen( HTTPS_PORT, function () {
 
-console.log('lisenign on port '+HTTP_PORT+' and on Redirrect port '+HTTPS_PORT)
- // for (var k in process){console.log(k +"  :  "+process[k])}
+logger.log('lisenign on port '+HTTP_PORT+' and on Redirrect port '+HTTPS_PORT)
+ // for (var k in process){logger.log(k +"  :  "+process[k])}
 })
 
 };
