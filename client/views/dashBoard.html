@@ -405,7 +405,7 @@ $('.chatBox').scrollTop($('.chatBox')[0].scrollHeight)
             }
 
             $.ajax({
-                url: '/meetapp/uploads',
+                url: '/uploads',
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -588,7 +588,7 @@ var primitiveBtnHTML='<button type="button" id="PrimitiveBtn" class="btn-sm prim
             if(fileEXT === 'jpg' || fileEXT ===  'png'|| fileEXT ===  'jpeg' || fileEXT ===  'gif'){
                 console.log('FileEXT = '+fileEXT);
                 console.log('the file: '+filesArry[x]+' is an image');
-                $('#filesList').append(thumbNailHTML+primitiveBtnHTML+'<img  src="/meetapp/users/'+username+'/'+filesArry[x]+'" alt="'+filesArry[x]+'"height="200" width="250"><div class="caption">'+filename+'</div></div></div>')
+                $('#filesList').append(thumbNailHTML+primitiveBtnHTML+'<img  src="/users/'+username+'/'+filesArry[x]+'" alt="'+filesArry[x]+'"height="200" width="250"><div class="caption">'+filename+'</div></div></div>')
             }else if(fileEXT === 'mov'){
                 console.log('Lets play this movie '+filesArry[x]);
                 $('#filesList').append(thumbNailHTML+'<video alt="'+filesArry[x]+'"src="../../users/'+username+'/'+filesArry[x]+'"height="200"width="200"controls></video><div class="caption">'+filename+'</div></div></div>')

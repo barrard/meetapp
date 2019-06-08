@@ -4,8 +4,8 @@ var HOST = location.host
 var PROTOCOL = location.protocol
  // var socket = io(PROTOCOL+'//'+HOST);
  var socket = io(PROTOCOL+'//'+HOST, {path:'/socket.io'});
- // var socket = io('https://draggon.us/meetapp');
-var socketid;
+
+ var socketid;
  socket.on('connection', function (data, myHtml) {
   $('#main').html(myHtml)
   if(localStorage.getItem('username')){
