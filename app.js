@@ -74,27 +74,17 @@ app.set('userLoggedIn', false)
 app.set('clientDir', __dirname+'/client/')
 
 
-if (PRODUCTION===true) {
- app.all('/*', function(req, res, next) {   
-  if (/^http$/.test(req.protocol)) {
-     var host = req.headers.host.replace(/:[0-9]+$/g, ""); // strip the port # if any
-     if ((HTTPS_PORT != null) && HTTPS_PORT !== 443) {
-       return res.redirect(301, "https://" + host + ":" + HTTPS_PORT + req.url);
-     } else {
-       return res.redirect(301, "https://" + host + req.url);
-     }
-   } else {
-     return next();
-   }
- });
- };
 
-app.use(express.static('client'));
+
+app.use(express.static(__dirname+'/client'));
 app.use(favicon(__dirname + '/client/images/favicon.ico'));
 
+app.get('/test', (req, res)=>{
+  logger.log('why?')
+})
 app.get('/', function(req, res){
   logger.log('connection IP address '+req.ip);
-  var readStream = fs.createReadStream(app.get('clientDir')+'index/index.html');
+  var readStream = fs.createReadStream('./index.html');
      //res.set({"Content-Disposition":"attachment; filename=//mygrid/myGridDocs.html"});
      readStream.pipe(res);
   // res.send(req.ip)
@@ -1009,7 +999,7 @@ app.get('/downloadhtmlfile',function(req,res){
 
 if (DEVELOPMENT===true) {
 //FOR DEV USE
-var port = 8080
+var port = 1337
 server.listen( port, function () {
 
 logger.log('lisenign on port '+port+' Development')
