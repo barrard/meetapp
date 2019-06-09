@@ -378,10 +378,7 @@ io.on("connection", function(socket) {
                 logger.log("collection.find error ");
               } else if (r.length !== 0) {
                 var userInfo = JSON.stringify(r[0]);
-                logger.log(
-                  "this is the rsult from finding the user " +
-                    JSON.stringify(r[0])
-                );
+           
                 logger.log(r[0]["username"]);
                 logger.log(r[0].password);
                 var sock = r[0].socketId;
