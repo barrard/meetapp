@@ -84,11 +84,8 @@ socket.on("usersListData", function(d) {
 socket.on("userLogin", function(sock, sockId, username) {
   console.log(sock + " is userlogin name " + username);
   var newSock = sockId;
-  newSock = newSock
-    .split("")
-    .splice(-5)
-    .join("");
-  if ($("#" + sock).length === 0) {
+
+  if (!$("#" + sock)) {
     console.log("We need to upddate the userList to add a new player");
     $("#onlineUsers").append(
       '<li id="' +
@@ -100,15 +97,26 @@ socket.on("userLogin", function(sock, sockId, username) {
     );
   }
 
-  $("#" + sock).attr("id", newSock);
+	
+	/* remove form offline userList */
+	let offline_userlist = Array.from($('#offlineUsers li'))
+	console.log(offline_userlist)
+	offline_userlist.map((li)=>{ if(li.id == sock)  $(li).remove()})
+	/* add to online online_userlist */
   $("#onlineUsers").append(
-    $("#" + newSock).attr("class", "list-group-item-success")
-  );
-  console.log(" userlist socket updated " + newSock);
+		'<li id="' +
+		newSock +
+		'" class="list-group-item-success' +
+		'">' +
+		username +
+		"</li>"		
+		);
 
-  for (k = 0; k < $(".list-group-item-success").length; k++) {
-    console.log($(".list-group-item-success")[k].innerHTML);
-  }
+		console.log(" userlist socket updated " + newSock);
+
+  // for (k = 0; k < $(".list-group-item-success").length; k++) {
+  //   console.log($(".list-group-item-success")[k].innerHTML);
+  // }
 });
 
 socket.on("disconnect", function() {
@@ -116,13 +124,25 @@ socket.on("disconnect", function() {
 });
 
 socket.on("userDisconnected", function(d) {
-  var sock = d;
+	var sock = d;
+	let username = ''
   console.log(sock + " user disconnected");
-  sock = sock
-    .split("")
-    .splice(-5)
-    .join("");
+
+		/* remove user from online list */
+		let online_userlist = Array.from($("#onlineUsers").children());
+		online_userlist.map((li)=>{
+			if(li.id == sock) {
+				username = $(li).text()
+				$(li).remove()
+			}
+		})
+		/* Add user to offline list */
   $("#offlineUsers").append(
-    $("#" + sock).attr("class", "list-group-item grey")
+		'<li id="' +
+		sock +
+		'" class="list-group-item grey' +
+		'">' +
+		username +
+		"</li>"		
   );
 });

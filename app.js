@@ -346,9 +346,9 @@ io.on("connection", function(socket) {
 
   var mkdirp = require("mkdirp");
 
-  socket.on("new", function(d, loggedInUserSocketid) {
+  socket.on("new", function new_(data, loggedInUserSocketid) {
     logger.log("----------new-------------emited");
-    var d = JSON.parse(d);
+    var d = JSON.parse(data);
     logger.log(d);
     var formData = d;
     var username = d.username;
@@ -378,7 +378,7 @@ io.on("connection", function(socket) {
                 logger.log("collection.find error ");
               } else if (r.length !== 0) {
                 var userInfo = JSON.stringify(r[0]);
-           
+
                 logger.log(r[0]["username"]);
                 logger.log(r[0].password);
                 var sock = r[0].socketId;
@@ -421,11 +421,15 @@ io.on("connection", function(socket) {
                   fs.readFile(
                     __dirname + "/client/views/dashBoard.html",
                     "utf8",
-                    function(err, data) {
+                    async function(err, data) {
                       if (err) {
                         logger.log(err);
                       } else {
                         socket.emit("newUserRegister", userInfo, data);
+                        let user = await collection.find({
+                          username
+                        }).toArray()
+                        let old_socketId = user[0].socketId
                         collection.update(
                           { username: username },
                           {
@@ -448,7 +452,7 @@ io.on("connection", function(socket) {
                             }
                           }
                         );
-                        socket.broadcast.emit("userLogin", sock, socket.id);
+                        socket.broadcast.emit("userLogin", old_socketId, socket.id, username);
                         logger.log("sock is the old, socket.id is new");
                       }
                     }
@@ -478,17 +482,21 @@ io.on("connection", function(socket) {
                 fs.mkdir(app.get("clientDir") + "users/" + username, function(
                   err
                 ) {
-                  logger.log(err);
-                  fs.readdir(
-                    app.get("clientDir") + "users/" + username,
-                    function(err, stats) {
-                      if (err) {
-                        logger.log(err);
-                      } else {
-                        logger.log("stats go here " + stats);
+                  if (err) {
+                    logger.log(err);
+                    new_(data, loggedInUserSocketid);
+                  } else {
+                    fs.readdir(
+                      app.get("clientDir") + "users/" + username,
+                      function(err, stats) {
+                        if (err) {
+                          logger.log(err);
+                        } else {
+                          logger.log("stats go here " + stats);
+                        }
                       }
-                    }
-                  );
+                    );
+                  }
                 }); //mkDir new user
                 fs.readFile(
                   __dirname + "/client/views/dashBoard.html",
@@ -571,12 +579,10 @@ io.on("connection", function(socket) {
           if (err) {
             logger.log("error finding users " + err);
           } else {
-
             for (var x = 0; x < item.length; x++) {
               userArray.push(item[x]);
             }
             if (userArray.length == item.length) {
-
               socket.emit("usersListData", userArray);
             }
           }
@@ -697,7 +703,7 @@ io.on("connection", function(socket) {
           " -n 50 -v"
       );
       primExec.stdout.on("data", function(stdout) {
-        logger.log(stdout)
+        logger.log(stdout);
         var perc = stdout.split(" ");
         if (perc[0].split("").length > 8) {
           perc = perc[1];
@@ -712,7 +718,7 @@ io.on("connection", function(socket) {
         // logger.log('Precentage: '++'%');
       });
       primExec.on("exit", function(code) {
-        setTimeout(()=>{
+        setTimeout(() => {
           socket.emit(
             "PrimitivePhotoIsDone",
             __dirname + "/client/users/" + username + "/P-" + fileName
@@ -723,7 +729,7 @@ io.on("connection", function(socket) {
             runPrimitiveInChildProcess(nextInLine["file"], nextInLine["user"]);
           }
           logger.log("exit with code " + code);
-        }, 500)
+        }, 500);
       });
       //})//exec callback
     } else {
