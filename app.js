@@ -218,7 +218,7 @@ app.post("/uploads", function(req, res) {
     var ext = ext.slice(index);
 
     fs.rename(file.path, file.path + ext);
-    resizeThisImage(file.path + ext);
+    // resizeThisImage(file.path + ext);
   });
 
   // log any errors that occur
@@ -715,16 +715,18 @@ io.on("connection", function(socket) {
         // logger.log('Precentage: '++'%');
       });
       primExec.on("exit", function(code) {
-        socket.emit(
-          "PrimitivePhotoIsDone",
-          __dirname + "/client/users/" + username + "/P-" + fileName
-        );
-        primitiveStateChecker = true;
-        if (primitiveQueueArray.length > 0) {
-          var nextInLine = primitiveQueueArray.shift();
-          runPrimitiveInChildProcess(nextInLine["file"], nextInLine["user"]);
-        }
-        logger.log("exit with code " + code);
+        setTimeout(()=>{
+          socket.emit(
+            "PrimitivePhotoIsDone",
+            __dirname + "/client/users/" + username + "/P-" + fileName
+          );
+          primitiveStateChecker = true;
+          if (primitiveQueueArray.length > 0) {
+            var nextInLine = primitiveQueueArray.shift();
+            runPrimitiveInChildProcess(nextInLine["file"], nextInLine["user"]);
+          }
+          logger.log("exit with code " + code);
+        }, 500)
       });
       //})//exec callback
     } else {
