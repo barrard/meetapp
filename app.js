@@ -687,21 +687,13 @@ io.on("connection", function(socket) {
       );
       // counterHere = false
       //var PRIMITIVE =
-      var primExec = exec(
-        "primitive -i " +
-          __dirname +
-          "/client/users/" +
-          username +
-          "/" +
-          fileName +
-          " -o " +
-          __dirname +
-          "/client/users/" +
-          username +
-          "/P-" +
-          fileName +
-          " -n 50 -v"
-      );
+      var primExec = exec(`
+        primitive -i 
+          "${__dirname}/client/users/${username}/${fileName}" 
+           -o 
+          "${__dirname}/client/users/${username}/P-${fileName}" 
+          -n 50 -v"
+      `);
       primExec.stdout.on("data", function(stdout) {
         logger.log(stdout);
         var perc = stdout.split(" ");
