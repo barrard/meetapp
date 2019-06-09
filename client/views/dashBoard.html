@@ -412,8 +412,12 @@ $('.chatBox').scrollTop($('.chatBox')[0].scrollHeight)
                 contentType: false,
                 success: function(data) {
                     console.log('upload successful!\n' + data);
-                    socket.emit('showMeTheFiles', localStorage.getItem("username"))                            }
+                    setTimeout(()=>{
+                        console.log('emit showMeTheFiles')
+                        socket.emit('showMeTheFiles', localStorage.getItem("username"))
 
+                    }, 300)
+                    
                 },
                 error: function(data) {
                     console.log('error ' + data)
@@ -441,9 +445,9 @@ $('.chatBox').scrollTop($('.chatBox')[0].scrollHeight)
                             if (percentComplete === 100) {
                                 $('.progress-bar').html('Done');
 
+                            }
                         }
-
-                    }, false);
+                        }, false);
 
                     return xhr;
                 }
