@@ -25,8 +25,9 @@ socket.on("loginError", function(d) {
 });
 
 socket.on("newUserRegister", function(d, html) {
-  console.log(JSON.parse(d));
-  $("#main").html(html);
+	console.log(d)
+
+	$("#main").html(html);
   socket.emit("dashboardReady", socketid);
 });
 

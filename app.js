@@ -217,7 +217,9 @@ app.post("/uploads", function(req, res) {
     var index = ext.lastIndexOf(".");
     var ext = ext.slice(index);
 
-    fs.rename(file.path, file.path + ext);
+    fs.rename(file.path, file.path + ext, err => {
+      if (err) logger.log(err);
+    });
     // resizeThisImage(file.path + ext);
   });
 
@@ -426,10 +428,12 @@ io.on("connection", function(socket) {
                         logger.log(err);
                       } else {
                         socket.emit("newUserRegister", userInfo, data);
-                        let user = await collection.find({
-                          username
-                        }).toArray()
-                        let old_socketId = user[0].socketId
+                        let user = await collection
+                          .find({
+                            username
+                          })
+                          .toArray();
+                        let old_socketId = user[0].socketId;
                         collection.update(
                           { username: username },
                           {
@@ -452,7 +456,12 @@ io.on("connection", function(socket) {
                             }
                           }
                         );
-                        socket.broadcast.emit("userLogin", old_socketId, socket.id, username);
+                        socket.broadcast.emit(
+                          "userLogin",
+                          old_socketId,
+                          socket.id,
+                          username
+                        );
                         logger.log("sock is the old, socket.id is new");
                       }
                     }
@@ -492,7 +501,8 @@ io.on("connection", function(socket) {
                         if (err) {
                           logger.log(err);
                         } else {
-                          logger.log("stats go here " + stats);
+                          logger.log("user dir stats");
+                          logger.log(stats);
                         }
                       }
                     );
@@ -687,13 +697,9 @@ io.on("connection", function(socket) {
       );
       // counterHere = false
       //var PRIMITIVE =
-      var primExec = exec(`
-        primitive -i 
-          "${__dirname}/client/users/${username}/${fileName}" 
-           -o 
-          "${__dirname}/client/users/${username}/P-${fileName}" 
-          -n 50 -v"
-      `);
+      var primExec = exec(
+        `primitive -i ${__dirname}/client/users/${username}/${fileName} -o ${__dirname}/client/users/${username}/P-${fileName} -n 50 -v`
+      );
       primExec.stdout.on("data", function(stdout) {
         logger.log(stdout);
         var perc = stdout.split(" ");

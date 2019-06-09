@@ -273,6 +273,7 @@ $('.chatBox').scrollTop($('.chatBox')[0].scrollHeight)
 
     socket.on('hereMyFilesHTML', function(html){
         $('#myFiles').html(html)
+        console.log(html)
         console.log('Did you get to your files?');
     })
 
