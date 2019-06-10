@@ -109,7 +109,7 @@
   var MongoDbLocData = [];
 
   function successGPS(position) {
-    console.log(position)
+    console.log(position);
     $("#GPStableHeaderDetails").html("");
     $("#GPStableBodyDetails").html("");
     console.log("success");
@@ -249,7 +249,9 @@
     var pos = data;
 
     if (FriendsLocations[pos.username] === undefined) {
-      console.log("WTF? WHO?");
+      FriendsLocations[pos.username] = {};
+      console.log("Creating Marker Array for user " + pos.username);
+      FriendsLocations[pos.username].currentPosition = [];
     }
 
     if (FriendsLocations[pos.username].currentPosition.length <= 0) {
