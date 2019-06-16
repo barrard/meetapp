@@ -212,6 +212,8 @@ app.post("/uploads", function(req, res) {
   // every time a file has been uploaded successfully,
   // rename it to it's orignal name
   form.on("file", function(field, file) {
+    logger.log(file)
+    logger.log(file.name)
     logger.log("field-" + field + " : file-" + JSON.stringify(file));
     var ext = file.name;
     var index = ext.lastIndexOf(".");

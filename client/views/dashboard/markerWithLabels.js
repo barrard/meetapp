@@ -16,7 +16,7 @@ function MarkerLabel_(marker) {
   this.eventDiv_.setAttribute("ondragstart", "return false;");
 
   // Get the DIV for the "X" to be displayed when the marker is raised.
- this.crossDiv_ = MarkerLabel_.getSharedCross();
+  this.crossDiv_ = MarkerLabel_.getSharedCross();
 }
 
 // MarkerLabel_ inherits from OverlayView:
@@ -27,7 +27,7 @@ MarkerLabel_.prototype = new google.maps.OverlayView();
  * raiseOnDrag parameter set to true. One cross is shared with all markers.
  * @private
  */
-MarkerLabel_.getSharedCross = function () {
+MarkerLabel_.getSharedCross = function() {
   var div;
   if (typeof MarkerLabel_.getSharedCross.crossDiv === "undefined") {
     div = document.createElement("img");
@@ -35,7 +35,8 @@ MarkerLabel_.getSharedCross = function () {
     // Hopefully Google never changes the standard "X" attributes:
     div.style.marginLeft = "-8px";
     div.style.marginTop = "-9px";
-    div.src = "http://maps.gstatic.com/intl/en_us/mapfiles/drag_cross_67_16.png";
+    div.src =
+      "http://maps.gstatic.com/intl/en_us/mapfiles/drag_cross_67_16.png";
     MarkerLabel_.getSharedCross.crossDiv = div;
   }
   return MarkerLabel_.getSharedCross.crossDiv;
@@ -46,7 +47,7 @@ MarkerLabel_.getSharedCross = function () {
  * automatically when the marker's <code>setMap</code> method is called.
  * @private
  */
-MarkerLabel_.prototype.onAdd = function () {
+MarkerLabel_.prototype.onAdd = function() {
   var me = this;
   var cMouseIsDown = false;
   var cDraggingLabel = false;
@@ -58,11 +59,12 @@ MarkerLabel_.prototype.onAdd = function () {
   var cStartCenter;
   // Constants:
   var cRaiseOffset = 20;
-  var cDraggingCursor = "url(http://maps.gstatic.com/intl/en_us/mapfiles/closedhand_8_8.cur)";
+  var cDraggingCursor =
+    "url(http://maps.gstatic.com/intl/en_us/mapfiles/closedhand_8_8.cur)";
 
   // Stops all processing of an event.
   //
-  var cAbortEvent = function (e) {
+  var cAbortEvent = function(e) {
     if (e.preventDefault) {
       e.preventDefault();
     }
@@ -72,7 +74,7 @@ MarkerLabel_.prototype.onAdd = function () {
     }
   };
 
-  var cStopBounce = function () {
+  var cStopBounce = function() {
     me.marker_.setAnimation(null);
   };
 
@@ -85,19 +87,22 @@ MarkerLabel_.prototype.onAdd = function () {
   }
 
   this.listeners_ = [
-    google.maps.event.addDomListener(this.eventDiv_, "mouseover", function (e) {
+    google.maps.event.addDomListener(this.eventDiv_, "mouseover", function(e) {
       if (me.marker_.getDraggable() || me.marker_.getClickable()) {
         this.style.cursor = "pointer";
         google.maps.event.trigger(me.marker_, "mouseover", e);
       }
     }),
-    google.maps.event.addDomListener(this.eventDiv_, "mouseout", function (e) {
-      if ((me.marker_.getDraggable() || me.marker_.getClickable()) && !cDraggingLabel) {
+    google.maps.event.addDomListener(this.eventDiv_, "mouseout", function(e) {
+      if (
+        (me.marker_.getDraggable() || me.marker_.getClickable()) &&
+        !cDraggingLabel
+      ) {
         this.style.cursor = me.marker_.getCursor();
         google.maps.event.trigger(me.marker_, "mouseout", e);
       }
     }),
-    google.maps.event.addDomListener(this.eventDiv_, "mousedown", function (e) {
+    google.maps.event.addDomListener(this.eventDiv_, "mousedown", function(e) {
       cDraggingLabel = false;
       if (me.marker_.getDraggable()) {
         cMouseIsDown = true;
@@ -108,7 +113,7 @@ MarkerLabel_.prototype.onAdd = function () {
         cAbortEvent(e); // Prevent map pan when starting a drag on a label
       }
     }),
-    google.maps.event.addDomListener(document, "mouseup", function (mEvent) {
+    google.maps.event.addDomListener(document, "mouseup", function(mEvent) {
       var position;
       if (cMouseIsDown) {
         cMouseIsDown = false;
@@ -116,13 +121,19 @@ MarkerLabel_.prototype.onAdd = function () {
         google.maps.event.trigger(me.marker_, "mouseup", mEvent);
       }
       if (cDraggingLabel) {
-        if (cRaiseEnabled) { // Lower the marker & label
-          position = me.getProjection().fromLatLngToDivPixel(me.marker_.getPosition());
+        if (cRaiseEnabled) {
+          // Lower the marker & label
+          position = me
+            .getProjection()
+            .fromLatLngToDivPixel(me.marker_.getPosition());
           position.y += cRaiseOffset;
-          me.marker_.setPosition(me.getProjection().fromDivPixelToLatLng(position));
+          me.marker_.setPosition(
+            me.getProjection().fromDivPixelToLatLng(position)
+          );
           // This is not the same bouncing style as when the marker portion is dragged,
           // but it will have to do:
-          try { // Will fail if running Google Maps API earlier than V3.3
+          try {
+            // Will fail if running Google Maps API earlier than V3.3
             me.marker_.setAnimation(google.maps.Animation.BOUNCE);
             setTimeout(cStopBounce, 1406);
           } catch (e) {}
@@ -135,12 +146,17 @@ MarkerLabel_.prototype.onAdd = function () {
         google.maps.event.trigger(me.marker_, "dragend", mEvent);
       }
     }),
-    google.maps.event.addListener(me.marker_.getMap(), "mousemove", function (mEvent) {
+    google.maps.event.addListener(me.marker_.getMap(), "mousemove", function(
+      mEvent
+    ) {
       var position;
       if (cMouseIsDown) {
         if (cDraggingLabel) {
           // Change the reported location from the mouse position to the marker position:
-          mEvent.latLng = new google.maps.LatLng(mEvent.latLng.lat() - cLatOffset, mEvent.latLng.lng() - cLngOffset);
+          mEvent.latLng = new google.maps.LatLng(
+            mEvent.latLng.lat() - cLatOffset,
+            mEvent.latLng.lng() - cLngOffset
+          );
           position = me.getProjection().fromLatLngToDivPixel(mEvent.latLng);
           if (cRaiseEnabled) {
             me.crossDiv_.style.left = position.x + "px";
@@ -148,9 +164,12 @@ MarkerLabel_.prototype.onAdd = function () {
             me.crossDiv_.style.display = "";
             position.y -= cRaiseOffset;
           }
-          me.marker_.setPosition(me.getProjection().fromDivPixelToLatLng(position));
-          if (cRaiseEnabled) { // Don't raise the veil; this hack needed to make MSIE act properly
-            me.eventDiv_.style.top = (position.y + cRaiseOffset) + "px";
+          me.marker_.setPosition(
+            me.getProjection().fromDivPixelToLatLng(position)
+          );
+          if (cRaiseEnabled) {
+            // Don't raise the veil; this hack needed to make MSIE act properly
+            me.eventDiv_.style.top = position.y + cRaiseOffset + "px";
           }
           google.maps.event.trigger(me.marker_, "drag", mEvent);
         } else {
@@ -168,9 +187,10 @@ MarkerLabel_.prototype.onAdd = function () {
         }
       }
     }),
-    google.maps.event.addDomListener(document, "keydown", function (e) {
+    google.maps.event.addDomListener(document, "keydown", function(e) {
       if (cDraggingLabel) {
-        if (e.keyCode === 27) { // Esc key
+        if (e.keyCode === 27) {
+          // Esc key
           cRaiseEnabled = false;
           me.marker_.setPosition(cStartPosition);
           me.marker_.getMap().setCenter(cStartCenter);
@@ -178,9 +198,10 @@ MarkerLabel_.prototype.onAdd = function () {
         }
       }
     }),
-    google.maps.event.addDomListener(this.eventDiv_, "click", function (e) {
+    google.maps.event.addDomListener(this.eventDiv_, "click", function(e) {
       if (me.marker_.getDraggable() || me.marker_.getClickable()) {
-        if (cIgnoreClick) { // Ignore the click reported when a label drag ends
+        if (cIgnoreClick) {
+          // Ignore the click reported when a label drag ends
           cIgnoreClick = false;
         } else {
           google.maps.event.trigger(me.marker_, "click", e);
@@ -188,18 +209,18 @@ MarkerLabel_.prototype.onAdd = function () {
         }
       }
     }),
-    google.maps.event.addDomListener(this.eventDiv_, "dblclick", function (e) {
+    google.maps.event.addDomListener(this.eventDiv_, "dblclick", function(e) {
       if (me.marker_.getDraggable() || me.marker_.getClickable()) {
         google.maps.event.trigger(me.marker_, "dblclick", e);
         cAbortEvent(e); // Prevent map zoom when double-clicking on a label
       }
     }),
-    google.maps.event.addListener(this.marker_, "dragstart", function (mEvent) {
+    google.maps.event.addListener(this.marker_, "dragstart", function(mEvent) {
       if (!cDraggingLabel) {
         cRaiseEnabled = this.get("raiseOnDrag");
       }
     }),
-    google.maps.event.addListener(this.marker_, "drag", function (mEvent) {
+    google.maps.event.addListener(this.marker_, "drag", function(mEvent) {
       if (!cDraggingLabel) {
         if (cRaiseEnabled) {
           me.setPosition(cRaiseOffset);
@@ -207,44 +228,65 @@ MarkerLabel_.prototype.onAdd = function () {
           // ensure it appears above all other markers. Also set the label's z-index
           // to 1000000 (plus or minus 1 depending on whether the label is supposed
           // to be above or below the marker).
-          me.labelDiv_.style.zIndex = 1000000 + (this.get("labelInBackground") ? -1 : +1);
+          me.labelDiv_.style.zIndex =
+            1000000 + (this.get("labelInBackground") ? -1 : +1);
         }
       }
     }),
-    google.maps.event.addListener(this.marker_, "dragend", function (mEvent) {
+    google.maps.event.addListener(this.marker_, "dragend", function(mEvent) {
       if (!cDraggingLabel) {
         if (cRaiseEnabled) {
           me.setPosition(0); // Also restores z-index of label
         }
       }
     }),
-    google.maps.event.addListener(this.marker_, "position_changed", function () {
+    google.maps.event.addListener(this.marker_, "position_changed", function() {
       me.setPosition();
     }),
-    google.maps.event.addListener(this.marker_, "zindex_changed", function () {
+    google.maps.event.addListener(this.marker_, "zindex_changed", function() {
       me.setZIndex();
     }),
-    google.maps.event.addListener(this.marker_, "visible_changed", function () {
+    google.maps.event.addListener(this.marker_, "visible_changed", function() {
       me.setVisible();
     }),
-    google.maps.event.addListener(this.marker_, "labelvisible_changed", function () {
-      me.setVisible();
-    }),
-    google.maps.event.addListener(this.marker_, "title_changed", function () {
+    google.maps.event.addListener(
+      this.marker_,
+      "labelvisible_changed",
+      function() {
+        me.setVisible();
+      }
+    ),
+    google.maps.event.addListener(this.marker_, "title_changed", function() {
       me.setTitle();
     }),
-    google.maps.event.addListener(this.marker_, "labelcontent_changed", function () {
-      me.setContent();
-    }),
-    google.maps.event.addListener(this.marker_, "labelanchor_changed", function () {
-      me.setAnchor();
-    }),
-    google.maps.event.addListener(this.marker_, "labelclass_changed", function () {
-      me.setStyles();
-    }),
-    google.maps.event.addListener(this.marker_, "labelstyle_changed", function () {
-      me.setStyles();
-    })
+    google.maps.event.addListener(
+      this.marker_,
+      "labelcontent_changed",
+      function() {
+        me.setContent();
+      }
+    ),
+    google.maps.event.addListener(
+      this.marker_,
+      "labelanchor_changed",
+      function() {
+        me.setAnchor();
+      }
+    ),
+    google.maps.event.addListener(
+      this.marker_,
+      "labelclass_changed",
+      function() {
+        me.setStyles();
+      }
+    ),
+    google.maps.event.addListener(
+      this.marker_,
+      "labelstyle_changed",
+      function() {
+        me.setStyles();
+      }
+    )
   ];
 };
 
@@ -254,7 +296,7 @@ MarkerLabel_.prototype.onAdd = function () {
  * method is called.
  * @private
  */
-MarkerLabel_.prototype.onRemove = function () {
+MarkerLabel_.prototype.onRemove = function() {
   var i;
   this.labelDiv_.parentNode.removeChild(this.labelDiv_);
   this.eventDiv_.parentNode.removeChild(this.eventDiv_);
@@ -269,7 +311,7 @@ MarkerLabel_.prototype.onRemove = function () {
  * Draws the label on the map.
  * @private
  */
-MarkerLabel_.prototype.draw = function () {
+MarkerLabel_.prototype.draw = function() {
   this.setContent();
   this.setTitle();
   this.setStyles();
@@ -280,7 +322,7 @@ MarkerLabel_.prototype.draw = function () {
  * The content can be plain text or an HTML DOM node.
  * @private
  */
-MarkerLabel_.prototype.setContent = function () {
+MarkerLabel_.prototype.setContent = function() {
   var content = this.marker_.get("labelContent");
   if (typeof content.nodeType === "undefined") {
     this.labelDiv_.innerHTML = content;
@@ -298,7 +340,7 @@ MarkerLabel_.prototype.setContent = function () {
  * always set to be the same as for the marker itself.
  * @private
  */
-MarkerLabel_.prototype.setTitle = function () {
+MarkerLabel_.prototype.setTitle = function() {
   this.eventDiv_.title = this.marker_.getTitle() || "";
 };
 
@@ -307,7 +349,7 @@ MarkerLabel_.prototype.setTitle = function () {
  * other specific styles requested.
  * @private
  */
-MarkerLabel_.prototype.setStyles = function () {
+MarkerLabel_.prototype.setStyles = function() {
   var i, labelStyle;
 
   // Apply style values from the style sheet defined in the labelClass parameter:
@@ -333,12 +375,16 @@ MarkerLabel_.prototype.setStyles = function () {
  * associated event DIV. This includes setting the DIV position, z-index, and visibility.
  * @private
  */
-MarkerLabel_.prototype.setMandatoryStyles = function () {
+MarkerLabel_.prototype.setMandatoryStyles = function() {
   this.labelDiv_.style.position = "absolute";
   this.labelDiv_.style.overflow = "hidden";
   // Make sure the opacity setting causes the desired effect on MSIE:
-  if (typeof this.labelDiv_.style.opacity !== "undefined" && this.labelDiv_.style.opacity !== "") {
-    this.labelDiv_.style.filter = "alpha(opacity=" + (this.labelDiv_.style.opacity * 100) + ")";
+  if (
+    typeof this.labelDiv_.style.opacity !== "undefined" &&
+    this.labelDiv_.style.opacity !== ""
+  ) {
+    this.labelDiv_.style.filter =
+      "alpha(opacity=" + this.labelDiv_.style.opacity * 100 + ")";
   }
 
   this.eventDiv_.style.position = this.labelDiv_.style.position;
@@ -355,7 +401,7 @@ MarkerLabel_.prototype.setMandatoryStyles = function () {
  * Sets the anchor point of the label.
  * @private
  */
-MarkerLabel_.prototype.setAnchor = function () {
+MarkerLabel_.prototype.setAnchor = function() {
   var anchor = this.marker_.get("labelAnchor");
   this.labelDiv_.style.marginLeft = -anchor.x + "px";
   this.labelDiv_.style.marginTop = -anchor.y + "px";
@@ -367,8 +413,10 @@ MarkerLabel_.prototype.setAnchor = function () {
  * Sets the position of the label. The z-index is also updated, if necessary.
  * @private
  */
-MarkerLabel_.prototype.setPosition = function (yOffset) {
-  var position = this.getProjection().fromLatLngToDivPixel(this.marker_.getPosition());
+MarkerLabel_.prototype.setPosition = function(yOffset) {
+  var position = this.getProjection().fromLatLngToDivPixel(
+    this.marker_.getPosition()
+  );
   if (typeof yOffset === "undefined") {
     yOffset = 0;
   }
@@ -386,10 +434,11 @@ MarkerLabel_.prototype.setPosition = function (yOffset) {
  * stacking order for Google Maps: markers to the south are in front of markers to the north.
  * @private
  */
-MarkerLabel_.prototype.setZIndex = function () {
-  var zAdjust = (this.marker_.get("labelInBackground") ? -1 : +1);
+MarkerLabel_.prototype.setZIndex = function() {
+  var zAdjust = this.marker_.get("labelInBackground") ? -1 : +1;
   if (typeof this.marker_.getZIndex() === "undefined") {
-    this.labelDiv_.style.zIndex = parseInt(this.labelDiv_.style.top, 10) + zAdjust;
+    this.labelDiv_.style.zIndex =
+      parseInt(this.labelDiv_.style.top, 10) + zAdjust;
     this.eventDiv_.style.zIndex = this.labelDiv_.style.zIndex;
   } else {
     this.labelDiv_.style.zIndex = this.marker_.getZIndex() + zAdjust;
@@ -402,7 +451,7 @@ MarkerLabel_.prototype.setZIndex = function () {
  * visible (i.e., its visible property is true) and the labelVisible property is true.
  * @private
  */
-MarkerLabel_.prototype.setVisible = function () {
+MarkerLabel_.prototype.setVisible = function() {
   if (this.marker_.get("labelVisible")) {
     this.labelDiv_.style.display = this.marker_.getVisible() ? "block" : "none";
   } else {
@@ -464,7 +513,8 @@ MarkerLabel_.prototype.setVisible = function () {
 function MarkerWithLabel(opt_options) {
   opt_options = opt_options || {};
   opt_options.labelContent = opt_options.labelContent || "";
-  opt_options.labelAnchor = opt_options.labelAnchor || new google.maps.Point(0, 0);
+  opt_options.labelAnchor =
+    opt_options.labelAnchor || new google.maps.Point(0, 0);
   opt_options.labelClass = opt_options.labelClass || "markerLabels";
   opt_options.labelStyle = opt_options.labelStyle || {};
   opt_options.labelInBackground = opt_options.labelInBackground || false;
@@ -502,8 +552,7 @@ MarkerWithLabel.prototype = new google.maps.Marker();
  * @param {Map} marker The map to which the marker is to be added.
  * @private
  */
-MarkerWithLabel.prototype.setMap = function (theMap) {
-
+MarkerWithLabel.prototype.setMap = function(theMap) {
   // Call the inherited function...
   google.maps.Marker.prototype.setMap.apply(this, arguments);
 
