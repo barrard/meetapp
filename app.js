@@ -5,7 +5,7 @@ var colors = require("colors");
 var logger = require("tracer").colorConsole({
   format:
     "{{timestamp.white}} <{{title.yellow}}> {{message.cyan}} (in {{file.red}}:{{line}})",
-  dateformat: "HH:MM:ss.L"
+  dateformat: "HH:MM:ss.L",
 });
 
 var express = require("express");
@@ -63,7 +63,7 @@ app.use(favicon(__dirname + "/client/images/favicon.ico"));
 app.get("/test", (req, res) => {
   logger.log("why?");
 });
-app.get("/", function(req, res) {
+app.get("/", function (req, res) {
   logger.log("connection IP address " + req.ip);
   var readStream = fs.createReadStream("./index.html");
   //res.set({"Content-Disposition":"attachment; filename=//mygrid/myGridDocs.html"});
@@ -71,41 +71,41 @@ app.get("/", function(req, res) {
   // res.send(req.ip)
 });
 
-app.get("teamBallJS/", function(req, res) {
+app.get("teamBallJS/", function (req, res) {
   logger.log("Duble dribble Teabball event " + req.connection.remoteAddress);
 });
 
-app.post("/goright", function(req, res) {
+app.post("/goright", function (req, res) {
   logger.log("were going right SERVO");
   http.get(
     {
       hostname: "192.168.200.88",
       port: 8266,
-      path: "/g"
+      path: "/g",
     },
-    function(resp) {
+    function (resp) {
       logger.log("resp " + resp);
       res.send();
     }
   );
 });
 
-app.post("/goleft", function(req, res) {
+app.post("/goleft", function (req, res) {
   logger.log("were going left SERVO");
   http.get(
     {
       hostname: "192.168.200.88",
       port: 8266,
-      path: "/l"
+      path: "/l",
     },
-    function(resp) {
+    function (resp) {
       logger.log("resp " + resp);
       res.send("done");
     }
   );
 });
 
-app.get("users/:username/", function(req, res) {
+app.get("users/:username/", function (req, res) {
   var username = req.params.username;
   var readStream = fs.createReadStream(
     app.get("clientDir") + "users/" + username + "/index.html"
@@ -120,7 +120,7 @@ app.get("users/:username/", function(req, res) {
 
 function resizeThisImage(image) {
   logger.log("Lets resize this image " + image);
-  Jimp.read(image, function(err, lenna) {
+  Jimp.read(image, function (err, lenna) {
     if (err) {
       logger.log(err);
     } else {
@@ -133,7 +133,7 @@ function resizeThisImage(image) {
   });
 }
 
-app.get("/video", function(req, res) {
+app.get("/video", function (req, res) {
   var readStream = fs.createReadStream(
     app.get("clientDir") + "webcamstream.html"
   );
@@ -144,7 +144,7 @@ app.get("/video", function(req, res) {
 var STREAM_PORT = 9998;
 // HTTP Server to accept incomming MPEG Stream
 var streamServer = require("http")
-  .createServer(function(request, response) {
+  .createServer(function (request, response) {
     var params = request.url.substr(1).split("/");
 
     if (params[0] == "badass") {
@@ -163,7 +163,7 @@ var streamServer = require("http")
           "x" +
           height
       );
-      request.on("data", function(data) {
+      request.on("data", function (data) {
         // logger.log('data')
         wss.broadcast(data, { binary: true });
       });
@@ -188,7 +188,7 @@ var streamServer = require("http")
 
 // })
 
-app.post("/uploads", function(req, res) {
+app.post("/uploads", function (req, res) {
   logger.log("POST UPLOADED FILES!!");
 
   // create an incoming form object
@@ -211,27 +211,27 @@ app.post("/uploads", function(req, res) {
 
   // every time a file has been uploaded successfully,
   // rename it to it's orignal name
-  form.on("file", function(field, file) {
-    logger.log(file)
-    logger.log(file.name)
+  form.on("file", function (field, file) {
+    logger.log(file);
+    logger.log(file.name);
     logger.log("field-" + field + " : file-" + JSON.stringify(file));
     var ext = file.name;
     var index = ext.lastIndexOf(".");
     var ext = ext.slice(index);
 
-    fs.rename(file.path, file.path + ext, err => {
+    fs.rename(file.path, file.path + ext, (err) => {
       if (err) logger.log(err);
     });
     // resizeThisImage(file.path + ext);
   });
 
   // log any errors that occur
-  form.on("error", function(err) {
+  form.on("error", function (err) {
     logger.log("An error has occured: \n" + err);
   });
 
   // once all the files have been uploaded, send a response to the client
-  form.on("end", function() {
+  form.on("end", function () {
     res.end("success");
   });
 
@@ -239,8 +239,8 @@ app.post("/uploads", function(req, res) {
   form.parse(req);
 });
 
-app.post("/updateLocations", function(req, res) {
-  MongoClient.connect(url, function(err, db) {
+app.post("/updateLocations", function (req, res) {
+  MongoClient.connect(url, function (err, db) {
     if (!err) {
       var ReqBody = req.body;
       var Length = ReqBody.length;
@@ -258,7 +258,7 @@ app.post("/updateLocations", function(req, res) {
       collection.update(
         { username: ReqBody[0].username },
         { $push: { "locations.lat": { $each: tempLatArry } } },
-        function(err, r) {
+        function (err, r) {
           if (err) {
             logger.log("error updateing users location " + err);
           } else {
@@ -269,7 +269,7 @@ app.post("/updateLocations", function(req, res) {
       collection.update(
         { username: ReqBody[0].username },
         { $push: { "locations.lng": { $each: tempLngArry } } },
-        function(err, r) {
+        function (err, r) {
           if (err) {
             logger.log("error updateing users location " + err);
           } else {
@@ -280,7 +280,7 @@ app.post("/updateLocations", function(req, res) {
       collection.update(
         { username: ReqBody[0].username },
         { $push: { "locations.time": { $each: tempTimeArry } } },
-        function(err, r) {
+        function (err, r) {
           if (err) {
             logger.log("error updateing users location " + err);
           } else {
@@ -300,7 +300,7 @@ var width = 320,
   height = 240,
   STREAM_MAGIC_BYTES = "jsmp"; // Must be 4 bytes
 
-wss.on("connection", function(socket) {
+wss.on("connection", function (socket) {
   // Send magic bytes and video size to the newly connected socket
   // struct { char magic[4]; unsigned short width, height;}
   var streamHeader = new Buffer(8);
@@ -311,12 +311,12 @@ wss.on("connection", function(socket) {
 
   logger.log("New WebSocket Connection (" + wss.clients.length + " total)");
 
-  socket.on("close", function(code, message) {
+  socket.on("close", function (code, message) {
     logger.log("Disconnected WebSocket (" + wss.clients.length + " total)");
   });
 });
 
-wss.broadcast = function(data, opts) {
+wss.broadcast = function (data, opts) {
   for (var i in this.clients) {
     if (this.clients[i].readyState == 1) {
       this.clients[i].send(data, opts);
@@ -328,7 +328,7 @@ wss.broadcast = function(data, opts) {
 
 var socketArray = [];
 
-io.on("connection", function(socket) {
+io.on("connection", function (socket) {
   logger.log("connection?? ");
   socketArray.push(socket);
   logger.log(
@@ -336,7 +336,7 @@ io.on("connection", function(socket) {
   );
 
   //CONECTION
-  fs.readFile(__dirname + "/client/views/login.html", "utf8", function(
+  fs.readFile(__dirname + "/client/views/login.html", "utf8", function (
     err,
     data
   ) {
@@ -364,7 +364,7 @@ io.on("connection", function(socket) {
         "Please user your keyboard and type in your login info"
       );
     } else {
-      MongoClient.connect(url, function(err, db) {
+      MongoClient.connect(url, function (err, db) {
         if (!err) {
           app.set("username", username);
           var collection = db.collection("allusers");
@@ -375,9 +375,9 @@ io.on("connection", function(socket) {
           logger.log("collection name " + collection.s.name);
           collection
             .find({
-              username: username
+              username: username,
             })
-            .toArray(function(err, r) {
+            .toArray(function (err, r) {
               if (err) {
                 logger.log("collection.find error ");
               } else if (r.length !== 0) {
@@ -390,13 +390,10 @@ io.on("connection", function(socket) {
                 logger.log(
                   loggedInUserSocketid + " result passed form the new emit "
                 );
-                sock = sock
-                  .split("")
-                  .splice(-5)
-                  .join("");
+                sock = sock.split("").splice(-5).join("");
 
                 if (r[0].password === password) {
-                  fs.stat(app.get("clientDir") + "users/" + username, function(
+                  fs.stat(app.get("clientDir") + "users/" + username, function (
                     err,
                     stat
                   ) {
@@ -409,7 +406,7 @@ io.on("connection", function(socket) {
                       );
                       fs.mkdir(
                         app.get("clientDir") + "users/" + username,
-                        function(err) {
+                        function (err) {
                           if (err)
                             logger.log(
                               err + " error creating the users directory"
@@ -425,14 +422,14 @@ io.on("connection", function(socket) {
                   fs.readFile(
                     __dirname + "/client/views/dashBoard.html",
                     "utf8",
-                    async function(err, data) {
+                    async function (err, data) {
                       if (err) {
                         logger.log(err);
                       } else {
                         socket.emit("newUserRegister", userInfo, data);
                         let user = await collection
                           .find({
-                            username
+                            username,
                           })
                           .toArray();
                         let old_socketId = user[0].socketId;
@@ -442,10 +439,10 @@ io.on("connection", function(socket) {
                             $set: {
                               loginDate: new Date(),
                               loggedIn: true,
-                              socketId: socket.id
-                            }
+                              socketId: socket.id,
+                            },
                           },
-                          function(err, r) {
+                          function (err, r) {
                             if (err) {
                               logger.log(
                                 "error! updating users logging in " + err
@@ -487,10 +484,10 @@ io.on("connection", function(socket) {
                   locations: {
                     lat: [],
                     lng: [],
-                    time: []
-                  }
+                    time: [],
+                  },
                 };
-                fs.mkdir(app.get("clientDir") + "users/" + username, function(
+                fs.mkdir(app.get("clientDir") + "users/" + username, function (
                   err
                 ) {
                   if (err) {
@@ -499,7 +496,7 @@ io.on("connection", function(socket) {
                   } else {
                     fs.readdir(
                       app.get("clientDir") + "users/" + username,
-                      function(err, stats) {
+                      function (err, stats) {
                         if (err) {
                           logger.log(err);
                         } else {
@@ -513,7 +510,7 @@ io.on("connection", function(socket) {
                 fs.readFile(
                   __dirname + "/client/views/dashBoard.html",
                   "utf8",
-                  function(err, data) {
+                  function (err, data) {
                     if (err) {
                       logger.log(err);
                     } else {
@@ -538,10 +535,10 @@ io.on("connection", function(socket) {
     } //username and pasword are not blank strings
   }); //socket emit 'new'
 
-  socket.on("dashboardReady", function(d) {
+  socket.on("dashboardReady", function (d) {
     logger.log("DASHBOARD IS READY " + d);
     //send the chat data and users online
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function (err, db) {
       if (err) {
         logger.log("error connection to DB " + err);
       } else {
@@ -549,12 +546,12 @@ io.on("connection", function(socket) {
         var allMessages = db.collection("allmessages");
         var allusers = db.collection("allusers");
 
-        allMessages.find().count(function(err, count) {
+        allMessages.find().count(function (err, count) {
           if (!err && count > 20) {
             allMessages
               .find()
               .skip(count - 20)
-              .toArray(function(err, item) {
+              .toArray(function (err, item) {
                 if (err) {
                   logger.log("error finding messages " + err);
                 } else {
@@ -569,7 +566,7 @@ io.on("connection", function(socket) {
                 }
               }); //allmessages find limit 20
           } else {
-            allMessages.find().toArray(function(err, item) {
+            allMessages.find().toArray(function (err, item) {
               if (err) {
                 logger.log("error finding messages " + err);
               } else {
@@ -587,7 +584,7 @@ io.on("connection", function(socket) {
         }); //allMessages.find()
 
         var userArray = [];
-        allusers.find({}).toArray(function(err, item) {
+        allusers.find({}).toArray(function (err, item) {
           if (err) {
             logger.log("error finding users " + err);
           } else {
@@ -620,13 +617,13 @@ io.on("connection", function(socket) {
       link:
         '<a class="btn btn-info" href="/users/' +
         app.get("username") +
-        '">Your link</a>'
+        '">Your link</a>',
       // '<a href="localhost:8081/"'+app.get('username')+'></a>'
       // <a href="">link</a>
     }); //emit login info
   }); //Emit DashboardReady
 
-  socket.on("showMeTheFiles", function(username) {
+  socket.on("showMeTheFiles", function (username) {
     // fs.watch(__dirname+'/client/users/'+username, function(end, filename){
     //   logger.log(filename+' changed in '+__dirname+'/client/users/'+username);
     //   // this.close()
@@ -636,7 +633,7 @@ io.on("connection", function(socket) {
     fs.readFile(
       __dirname + "/client/views/dashboard/myFiles.html",
       "utf8",
-      function(err, data) {
+      function (err, data) {
         if (err) {
           logger.log(err);
         } else {
@@ -647,12 +644,12 @@ io.on("connection", function(socket) {
     );
   });
 
-  socket.on("getUserFiles", function(username) {
+  socket.on("getUserFiles", function (username) {
     logger.log(username + " getUserFiles was emited, lets access that folder");
-    fs.readdir(__dirname + "/client/users/" + username, function(err, files) {
+    fs.readdir(__dirname + "/client/users/" + username, function (err, files) {
       if (err) {
         if ((err.code = "ENOENT")) {
-          fs.mkdir(app.get("clientDir") + "users/" + username, function(err) {
+          fs.mkdir(app.get("clientDir") + "users/" + username, function (err) {
             if (err) logger.log(err + " error creating the users directory");
           });
           logger.log("This needs to be fixed");
@@ -677,7 +674,7 @@ io.on("connection", function(socket) {
   var primitiveStateChecker = true;
   var primitiveQueueArray = [];
 
-  socket.on("LetsRunThatPrimitiveProgram", function(fileName, username) {
+  socket.on("LetsRunThatPrimitiveProgram", function (fileName, username) {
     runPrimitiveInChildProcess(fileName, username);
   });
 
@@ -698,11 +695,10 @@ io.on("connection", function(socket) {
           fileName
       );
       // counterHere = false
-      //var PRIMITIVE =
-      var primExec = exec(
-        `primitive -i ${__dirname}/client/users/${username}/${fileName} -o ${__dirname}/client/users/${username}/P-${fileName} -n 50 -v`
-      );
-      primExec.stdout.on("data", function(stdout) {
+      var primitiveCommand = `primitive -i ${__dirname}/client/users/${username}/${fileName} -o ${__dirname}/client/users/${username}/P-${fileName} -n 50 -v`;
+        console.log(primitiveCommand)
+      var primExec = exec(primitiveCommand);
+      primExec.stdout.on("data", function (stdout) {
         logger.log(stdout);
         var perc = stdout.split(" ");
         if (perc[0].split("").length > 8) {
@@ -717,7 +713,7 @@ io.on("connection", function(socket) {
         socket.emit("primitivePercentDone", Math.round((perc / 50) * 100));
         // logger.log('Precentage: '++'%');
       });
-      primExec.on("exit", function(code) {
+      primExec.on("exit", function (code) {
         setTimeout(() => {
           socket.emit(
             "PrimitivePhotoIsDone",
@@ -739,7 +735,7 @@ io.on("connection", function(socket) {
     }
   } //runPrimitiveChildProcess
 
-  socket.on("letsRenameThisFile", function(before, after, username) {
+  socket.on("letsRenameThisFile", function (before, after, username) {
     logger.log(
       "Filename: " + before + " changed to " + after + " username " + username
     );
@@ -748,7 +744,7 @@ io.on("connection", function(socket) {
     fs.rename(
       app.get("clientDir") + "users/" + username + "/" + before,
       app.get("clientDir") + "users/" + username + "/" + after + fileEXT,
-      function(err) {
+      function (err) {
         if (err) {
           logger.log(err);
         } else {
@@ -766,7 +762,7 @@ io.on("connection", function(socket) {
     );
   });
 
-  socket.on("UserWantsToDeleteFile", function(filename, username) {
+  socket.on("UserWantsToDeleteFile", function (filename, username) {
     // logger.log('File: '+filename+' and username is:  '+username);
     var someKindOfValidation = true;
     if (someKindOfValidation) {
@@ -780,7 +776,7 @@ io.on("connection", function(socket) {
       );
       fs.unlink(
         app.get("clientDir") + "users/" + username + "/" + filename,
-        function(err) {
+        function (err) {
           if (err) {
             return console.error(err);
           }
@@ -790,12 +786,12 @@ io.on("connection", function(socket) {
     }
   });
 
-  socket.on("getMap", function() {
+  socket.on("getMap", function () {
     logger.log("WE NEED TO GET THE MAP FORM THE FILE YO!");
     fs.readFile(
       __dirname + "/client/views/dashboard/map.html",
       "utf8",
-      function(err, data) {
+      function (err, data) {
         if (err) {
           logger.log(err);
         } else {
@@ -806,12 +802,12 @@ io.on("connection", function(socket) {
     );
   });
 
-  socket.on("GetBlocksHTML", function() {
+  socket.on("GetBlocksHTML", function () {
     logger.log("WE NEED TO GET THE BLOCKS HTML!");
     fs.readFile(
       __dirname + "/client/views/blocks/blocks.html",
       "utf8",
-      function(err, data) {
+      function (err, data) {
         if (err) {
           logger.log(err);
         } else {
@@ -822,36 +818,36 @@ io.on("connection", function(socket) {
     );
   });
 
-  socket.on("blockClick", function(data) {
+  socket.on("blockClick", function (data) {
     logger.log(data.id + " : " + data.top + " top " + data.left + " left");
     io.sockets.emit("blockMove", data);
   });
 
-  socket.on("weGotSomePositionToShare", function(data) {
+  socket.on("weGotSomePositionToShare", function (data) {
     logger.log(data);
 
     socket.broadcast.emit("allFriendsGPSPosition", data);
   });
 
-  socket.on("someUSerStoppedGPSTracking", function(data) {
+  socket.on("someUSerStoppedGPSTracking", function (data) {
     logger.log(data);
   });
 
-  socket.on("chatInput", function(d) {
+  socket.on("chatInput", function (d) {
     logger.log("got some chat input here from " + d.sender);
     logger.log(d);
     logger.log("my d.time is " + d.time);
     var newTime = new Date(d.time);
     var day = newTime.getDate();
     var month = newTime.getMonth() + 1;
-    var hours = function() {
+    var hours = function () {
       if (newTime.getHours() > 12) {
         return newTime.getHours() - 12;
       } else {
         return newTime.getHours();
       }
     };
-    var AmPm = function() {
+    var AmPm = function () {
       if (newTime.getHours() > 11) {
         return "PM";
       } else {
@@ -887,11 +883,11 @@ io.on("connection", function(socket) {
       seconds +
       " " +
       AmPm();
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function (err, db) {
       if (!err) {
         var collection = db.collection("allmessages");
         logger.log("were in the mongoDB!");
-        collection.insert(d, function(err, result) {
+        collection.insert(d, function (err, result) {
           if (err) {
             logger.log("Error message! " + err);
           } else {
@@ -908,7 +904,7 @@ io.on("connection", function(socket) {
     });
   });
 
-  socket.once("disconnect", function() {
+  socket.once("disconnect", function () {
     var indexOfDisconectedSocket = socketArray.indexOf(socket);
     if (indexOfDisconectedSocket > -1) {
       logger.log("remove this socket " + socket.id + " from socketArray");
@@ -918,16 +914,16 @@ io.on("connection", function(socket) {
     }
     logger.log("disconnection! " + socket.id);
     io.sockets.emit("userDisconnected", socket.id);
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function (err, db) {
       if (err) {
         logger.log(err + " while diconnecting");
       } else {
         db.collection("allusers").update(
           {
-            socketId: socket.id
+            socketId: socket.id,
           },
           { $set: { loggedIn: false, logoutDate: new Date() } },
-          function(e, r) {
+          function (e, r) {
             if (e) {
               logger.log(e);
             } else {
@@ -939,17 +935,17 @@ io.on("connection", function(socket) {
     });
   });
 
-  socket.on("error", function(err) {
+  socket.on("error", function (err) {
     logger.log("We have an error somehwere " + err);
   });
 }); //MASTER IO SOCKET
 
-app.get("/downloadhtmlfile", function(req, res) {
+app.get("/downloadhtmlfile", function (req, res) {
   var readStream = fs.createReadStream(
     app.get("clientDir") + "scrape/iframe.html"
   );
   res.set({
-    "Content-Disposition": "attachment; filename=//scrape/iframe.html"
+    "Content-Disposition": "attachment; filename=//scrape/iframe.html",
   });
   readStream.pipe(res);
 });
@@ -957,7 +953,7 @@ app.get("/downloadhtmlfile", function(req, res) {
 if (DEVELOPMENT === true) {
   //FOR DEV USE
   var port = 1337;
-  server.listen(port, function() {
+  server.listen(port, function () {
     logger.log("lisenign on port " + port + " Development");
     //  // for (var k in process){logger.log(k +"  :  "+process[k])}
   });
@@ -968,7 +964,7 @@ if (PRODUCTION === true) {
   // var port = 443
 
   //FOR PRODUCTION
-  httpsServer.listen(HTTPS_PORT, function() {
+  httpsServer.listen(HTTPS_PORT, function () {
     logger.log(
       "lisenign on port " + HTTP_PORT + " and on Redirrect port " + HTTPS_PORT
     );
